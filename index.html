@@ -19,13 +19,13 @@
                     <span class="bg-indigo-600 text-white p-2 rounded-xl font-bold text-xl"><i class="fa-solid fa-bolt"></i></span>
                     <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
                 </div>
-                <!-- Indicador de Usuários Online -->
+                <!-- Indicador de Usuários Online em Tempo Real -->
                 <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
                     <span class="relative flex h-2.5 w-2.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <span class="text-xs font-bold text-emerald-700"><span id="contador-online">48</span> online</span>
+                    <span class="text-xs font-bold text-emerald-700"><span id="contador-online">54</span> online</span>
                 </div>
             </div>
             <div class="flex items-center space-x-3">
@@ -186,14 +186,14 @@
         let filtroAtualTipo = 'todos';
         let filtroAtualCat = 'todas';
 
-        // Simula variação de usuários online
+        // Simula variação natural de usuários online em tempo real
         setInterval(() => {
             const spanOnline = document.getElementById('contador-online');
             let atual = parseInt(spanOnline.innerText);
-            let variacao = Math.floor(Math.random() * 3) - 1;
-            let novoValor = Math.max(40, atual + variacao);
+            let variacao = Math.floor(Math.random() * 3) - 1; // -1, 0 ou +1
+            let novoValor = Math.max(45, atual + variacao);
             spanOnline.innerText = novoValor;
-        }, 6000);
+        }, 5000);
 
         function abrirModalPost() {
             document.getElementById('modal-post').classList.remove('hidden');
@@ -212,7 +212,7 @@
             const tipo = document.getElementById('tipo-post').value;
             const categoria = document.getElementById('categoria-post').value;
             const autor = document.getElementById('post-autor').value.trim() || 'Novo Usuário, 18';
-            const whatsapp = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); // Remove caracteres não numéricos
+            const whatsapp = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); 
             const texto = document.getElementById('post-texto').value.trim();
             const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
 
@@ -226,7 +226,6 @@
                 return;
             }
 
-            // Garante o prefixo do Brasil (55) se o usuário não colocou
             const numeroCompleto = whatsapp.startsWith('55') ? whatsapp : '55' + whatsapp;
 
             const feed = document.getElementById('feed-posts');
@@ -276,7 +275,6 @@
             fecharModalPost();
             aplicarFiltros();
 
-            // Limpa os campos
             document.getElementById('post-texto').value = '';
             document.getElementById('post-autor').value = '';
             document.getElementById('post-whatsapp').value = '';

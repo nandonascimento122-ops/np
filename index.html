@@ -1,779 +1,322 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FotoMarket - Mercado de Fotos P2P</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0284c7',
-              600: '#0284c7',
-              700: '#0369a1',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .watermark-overlay {
-      background-image: repeating-linear-gradient(
-        -45deg,
-        rgba(255, 255, 255, 0.15),
-        rgba(255, 255, 255, 0.15) 20px,
-        rgba(0, 0, 0, 0.15) 20px,
-        rgba(0, 0, 0, 0.15) 40px
-      );
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobJovem - Talentos da Nova Geração</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="bg-gray-100 text-gray-800 font-sans antialiased">
 
-  <!-- NAVIGATION BAR -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 gap-4">
-        
-        <!-- Logo -->
-        <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('explore')">
-          <div class="bg-gradient-to-tr from-sky-500 to-indigo-500 p-2 rounded-xl text-white shadow-lg shadow-sky-500/20">
-            <i class="fa-solid fa-camera-retro text-xl"></i>
-          </div>
-          <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-sky-400 bg-clip-text text-transparent">
-            FotoMarket
-          </span>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="flex-1 max-w-md hidden md:block">
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar fotos, lugares, temas..." class="w-full bg-slate-800/80 border border-slate-700/80 rounded-full pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all">
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-3">
-          <button onclick="openSellModal()" class="hidden sm:flex items-center gap-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white px-4 py-2 rounded-full font-medium text-sm transition-all shadow-md shadow-sky-500/20 hover:scale-[1.02]">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Vender Foto</span>
-          </button>
-
-          <button onclick="switchTab('my-account')" class="p-2 text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-colors relative" title="Minha Conta">
-            <i class="fa-solid fa-user-circle text-xl"></i>
-          </button>
-
-          <button onclick="toggleCartDrawer()" class="p-2 text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-colors relative" title="Carrinho">
-            <i class="fa-solid fa-cart-shopping text-xl"></i>
-            <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-sky-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 hidden">0</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT CONTAINER -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- TAB 1: EXPLORE / MARKETPLACE -->
-    <section id="tab-explore">
-      
-      <!-- Hero Banner -->
-      <div class="relative rounded-3xl overflow-hidden mb-8 bg-gradient-to-r from-slate-800 via-slate-800/80 to-slate-900 border border-slate-800 p-8 sm:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8">
-        <div class="max-w-xl">
-          <span class="inline-block px-3 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-semibold rounded-full mb-3">Mercado P2P Sem Intermediários</span>
-          <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">Compre e venda fotografias exclusivas em alta resolução</h1>
-          <p class="text-slate-400 text-sm sm:text-base leading-relaxed">Conecte-se com fotógrafos do mundo todo. Baixe imagens autênticas sem intermediários com licença comercial inclusa.</p>
-        </div>
-        <button onclick="openSellModal()" class="sm:hidden w-full bg-sky-500 hover:bg-sky-400 text-white font-medium py-3 rounded-xl transition-all">
-          Começar a Vender
-        </button>
-      </div>
-
-      <!-- Filters & Categories -->
-      <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 pb-4 border-b border-slate-800">
-        
-        <!-- Category Chips -->
-        <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none" id="categoryChips">
-          <button onclick="setCategory('all')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-sky-500 text-white" data-cat="all">Todas</button>
-          <button onclick="setCategory('Natureza')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700" data-cat="Natureza">Natureza</button>
-          <button onclick="setCategory('Urbana')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700" data-cat="Urbana">Urbana</button>
-          <button onclick="setCategory('Pessoas')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700" data-cat="Pessoas">Pessoas</button>
-          <button onclick="setCategory('Arquitetura')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700" data-cat="Arquitetura">Arquitetura</button>
-          <button onclick="setCategory('Gastronomia')" class="cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700" data-cat="Gastronomia">Gastronomia</button>
-        </div>
-
-        <!-- Sorting -->
-        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <label class="text-xs text-slate-400 whitespace-nowrap">Ordenar por:</label>
-          <select id="sortSelect" onchange="renderMarketplace()" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
-            <option value="recent">Mais Recentes</option>
-            <option value="popular">Mais Populares</option>
-            <option value="price-asc">Menor Preço</option>
-            <option value="price-desc">Maior Preço</option>
-          </select>
-        </div>
-
-      </div>
-
-      <!-- Photos Grid -->
-      <div id="photosGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <!-- Rendered dynamically -->
-      </div>
-
-    </section>
-
-    <!-- TAB 2: MY ACCOUNT -->
-    <section id="tab-my-account" class="hidden">
-      
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-1">Minha Conta</h2>
-        <p class="text-slate-400 text-sm">Gerencie suas fotos à venda, acompanhe vendas e veja seu histórico de compras.</p>
-      </div>
-
-      <!-- Sub Tabs -->
-      <div class="flex border-b border-slate-800 mb-8 gap-8">
-        <button onclick="switchAccountSubTab('selling')" id="subtab-btn-selling" class="pb-3 text-sm font-semibold border-b-2 border-sky-500 text-sky-400">Minhas Fotos à Venda</button>
-        <button onclick="switchAccountSubTab('purchased')" id="subtab-btn-purchased" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200">Fotos Compradas</button>
-      </div>
-
-      <!-- SELLING CONTENT -->
-      <div id="account-selling-content">
-        <!-- Stats Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div class="bg-slate-800/50 border border-slate-800 p-5 rounded-2xl">
-            <span class="text-slate-400 text-xs font-medium">Fotos Anunciadas</span>
-            <p id="statTotalPhotos" class="text-2xl font-bold text-white mt-1">0</p>
-          </div>
-          <div class="bg-slate-800/50 border border-slate-800 p-5 rounded-2xl">
-            <span class="text-slate-400 text-xs font-medium">Vendas Realizadas</span>
-            <p id="statTotalSales" class="text-2xl font-bold text-white mt-1">0</p>
-          </div>
-          <div class="bg-slate-800/50 border border-slate-800 p-5 rounded-2xl">
-            <span class="text-slate-400 text-xs font-medium">Saldo Acumulado</span>
-            <p id="statTotalEarnings" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</p>
-          </div>
-        </div>
-
-        <div id="mySellingList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <!-- Rendered dynamically -->
-        </div>
-      </div>
-
-      <!-- PURCHASED CONTENT -->
-      <div id="account-purchased-content" class="hidden">
-        <div id="myPurchasedList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <!-- Rendered dynamically -->
-        </div>
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- MODAL: PREVIEW & BUY -->
-  <div id="previewModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl relative">
-      
-      <!-- Close Button -->
-      <button onclick="closePreviewModal()" class="absolute top-4 right-4 z-10 w-9 h-9 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-full flex items-center justify-center transition-colors">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <!-- Image Display with Watermark -->
-      <div class="md:w-3/5 bg-slate-950 flex items-center justify-center relative min-h-[300px] md:min-h-[450px]">
-        <img id="modalImage" src="" alt="" class="max-h-[450px] w-full object-contain">
-        
-        <!-- Watermark Overlay -->
-        <div class="absolute inset-0 watermark-overlay flex flex-col items-center justify-center pointer-events-none opacity-40 select-none">
-          <span class="text-white font-extrabold text-2xl tracking-widest uppercase rotate-[-25deg] border-2 border-white/40 px-6 py-2 rounded-xl">FOTOMARKET PREVIEW</span>
-        </div>
-      </div>
-
-      <!-- Photo Details -->
-      <div class="md:w-2/5 p-6 md:p-8 flex flex-col justify-between overflow-y-auto">
-        <div>
-          <div class="flex items-center gap-2 mb-3">
-            <span id="modalCategory" class="px-2.5 py-0.5 bg-sky-500/10 text-sky-400 text-xs font-semibold rounded-md border border-sky-500/20"></span>
-            <span id="modalLicense" class="px-2.5 py-0.5 bg-slate-800 text-slate-400 text-xs font-semibold rounded-md"></span>
-          </div>
-
-          <h3 id="modalTitle" class="text-2xl font-bold text-white mb-2"></h3>
-          
-          <!-- Author Info -->
-          <div class="flex items-center gap-3 my-4 pb-4 border-b border-slate-800">
-            <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-bold text-sky-400 text-sm">
-              <i class="fa-solid fa-user"></i>
+    <!-- Header / Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-indigo-600 text-white p-2 rounded-xl font-bold text-xl"><i class="fa-solid fa-bolt"></i></span>
+                    <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
+                </div>
+                <!-- Indicador de Usuários Online -->
+                <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                    <span class="relative flex h-2.5 w-2.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-xs font-bold text-emerald-700"><span id="contador-online">48</span> online</span>
+                </div>
             </div>
-            <div>
-              <p id="modalAuthor" class="text-sm font-semibold text-slate-200"></p>
-              <p class="text-xs text-slate-400">Fotógrafo Verificado</p>
+            <div class="flex items-center space-x-3">
+                <button onclick="alert('Funcionalidade de perfil em breve!')" class="bg-indigo-50 text-indigo-600 font-semibold px-4 py-2 rounded-xl hover:bg-indigo-100 transition text-sm">Meu Perfil</button>
             </div>
-          </div>
-
-          <!-- Technical Specs -->
-          <div class="space-y-2 text-xs text-slate-400 mb-6">
-            <div class="flex justify-between"><span>Resolução Original:</span> <span id="modalRes" class="text-slate-200 font-medium">4K High-Res</span></div>
-            <div class="flex justify-between"><span>Formato do Arquivo:</span> <span class="text-slate-200 font-medium">JPEG / WebP</span></div>
-            <div class="flex justify-between"><span>Autorização de Modelo:</span> <span class="text-slate-200 font-medium">Inclusa</span></div>
-          </div>
         </div>
+    </header>
 
-        <!-- Action / Purchase -->
-        <div class="pt-4 border-t border-slate-800">
-          <div class="flex items-baseline justify-between mb-4">
-            <span class="text-xs text-slate-400">Preço da Licença</span>
-            <span id="modalPrice" class="text-3xl font-extrabold text-white"></span>
-          </div>
+    <!-- Main Container -->
+    <main class="max-w-2xl mx-auto px-4 py-6">
 
-          <div class="flex gap-3">
-            <button id="modalAddToCartBtn" onclick="" class="flex-1 bg-sky-500 hover:bg-sky-400 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-cart-plus"></i>
-              <span>Adicionar ao Carrinho</span>
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MODAL: SELL PHOTO -->
-  <div id="sellModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      
-      <button onclick="closeSellModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-
-      <h3 class="text-2xl font-bold text-white mb-1">Anunciar Nova Foto</h3>
-      <p class="text-xs text-slate-400 mb-6">Envie sua fotografia e alcance compradores do mundo todo.</p>
-
-      <form id="sellForm" onsubmit="handleSellSubmit(event)" class="space-y-4">
-        
-        <!-- Image Drag & Drop -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-2">Arquivo da Foto</label>
-          <div class="border-2 border-dashed border-slate-700 hover:border-sky-500 rounded-2xl p-6 text-center cursor-pointer relative bg-slate-800/40 transition-colors" onclick="document.getElementById('photoInput').click()">
-            <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)" required>
-            <div id="uploadPlaceholder" class="space-y-2">
-              <i class="fa-solid fa-cloud-arrow-up text-3xl text-sky-400"></i>
-              <p class="text-xs text-slate-300">Clique para selecionar uma imagem</p>
-              <p class="text-[10px] text-slate-500">PNG, JPG, WEBP de alta qualidade</p>
+        <!-- Caixa de Publicação (Estilo Facebook) -->
+        <div class="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-200">
+            <div class="flex items-center space-x-3 mb-3">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
+                <input type="text" placeholder="O que você está precisando ou quer oferecer?" class="w-full bg-gray-100 hover:bg-gray-200/65 transition px-4 py-2.5 rounded-full text-sm focus:outline-none cursor-pointer" onclick="abrirModalPost()" readonly>
             </div>
-            <img id="uploadPreview" class="hidden max-h-40 mx-auto rounded-lg object-contain">
-          </div>
+            <div class="flex border-t border-gray-100 pt-3 justify-around">
+                <button onclick="abrirModalComTipo('oferecer')" class="flex items-center space-x-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm transition">
+                    <i class="fa-solid fa-hand-holding-dollar text-emerald-500 text-base"></i>
+                    <span>Oferecer Serviço</span>
+                </button>
+                <button onclick="abrirModalComTipo('precisar')" class="flex items-center space-x-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm transition">
+                    <i class="fa-solid fa-bullhorn text-indigo-500 text-base"></i>
+                    <span>Estou Precisando</span>
+                </button>
+            </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Título da Foto</label>
-          <input type="text" id="sellTitle" placeholder="Ex: Pôr do sol na praia de Pipa" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
+        <!-- Abas de Filtro Principal (Tipo) -->
+        <div class="flex space-x-2 mb-3">
+            <button onclick="filtrarFeed('todos', 'tipo')" id="btn-tipo-todos" class="bg-indigo-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-full shadow-sm transition">Todos</button>
+            <button onclick="filtrarFeed('oferecer', 'tipo')" id="btn-tipo-oferecer" class="bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition">Oferecendo</button>
+            <button onclick="filtrarFeed('precisar', 'tipo')" id="btn-tipo-precisar" class="bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition">Precisando</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Categoria</label>
-            <select id="sellCategory" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
-              <option value="Natureza">Natureza</option>
-              <option value="Urbana">Urbana</option>
-              <option value="Pessoas">Pessoas</option>
-              <option value="Arquitetura">Arquitetura</option>
-              <option value="Gastronomia">Gastronomia</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Preço (R$)</label>
-            <input type="number" id="sellPrice" min="1" step="0.5" placeholder="49.90" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
-          </div>
+        <!-- Filtros por Categoria -->
+        <div class="flex space-x-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+            <button onclick="filtrarFeed('todas', 'cat')" id="btn-cat-todas" class="bg-gray-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition">Todas Categorias</button>
+            <button onclick="filtrarFeed('Design', 'cat')" id="btn-cat-Design" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Design</button>
+            <button onclick="filtrarFeed('Vídeo', 'cat')" id="btn-cat-Vídeo" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Vídeos</button>
+            <button onclick="filtrarFeed('Tecnologia', 'cat')" id="btn-cat-Tecnologia" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Tecnologia</button>
+            <button onclick="filtrarFeed('Aulas', 'cat')" id="btn-cat-Aulas" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Aulas</button>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Licença</label>
-          <select id="sellLicense" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500">
-            <option value="Comercial">Comercial (Para Uso Publicitário/Redes)</option>
-            <option value="Editorial">Editorial (Apenas Para Notícias/Blogs)</option>
-          </select>
-        </div>
-
-        <div class="pt-2">
-          <button type="submit" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-sky-500/20">
-            Publicar Anúncio
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
-
-  <!-- CART DRAWER -->
-  <div id="cartDrawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-900 border-l border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-    
-    <div class="p-6 border-b border-slate-800 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-cart-shopping text-sky-400"></i>
-        <h3 class="text-lg font-bold text-white">Carrinho de Compras</h3>
-      </div>
-      <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-white">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-    </div>
-
-    <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
-      <!-- Cart Items -->
-    </div>
-
-    <div class="p-6 border-t border-slate-800 bg-slate-900/50 space-y-4">
-      
-      <!-- Coupon Code -->
-      <div class="flex gap-2">
-        <input type="text" id="couponInput" placeholder="Cupom de desconto (FOTO10)" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
-        <button onclick="applyCoupon()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-medium border border-slate-700">Aplicar</button>
-      </div>
-
-      <div class="space-y-1 text-xs text-slate-400">
-        <div class="flex justify-between"><span>Subtotal</span><span id="cartSubtotal">R$ 0,00</span></div>
-        <div class="flex justify-between text-emerald-400"><span>Desconto</span><span id="cartDiscount">R$ 0,00</span></div>
-        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-slate-800">
-          <span>Total</span>
-          <span id="cartTotal">R$ 0,00</span>
-        </div>
-      </div>
-
-      <button onclick="simulateCheckout()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-lock"></i>
-        <span>Finalizar Compra</span>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    // Initial Seed Data
-    const defaultPhotos = [
-      {
-        id: "p1",
-        title: "Montanhas Nevadas ao Amanhecer",
-        category: "Natureza",
-        price: 39.90,
-        author: "Lucas Silveira",
-        license: "Comercial",
-        likes: 24,
-        image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80",
-        uploadedAt: 1
-      },
-      {
-        id: "p2",
-        title: "Luzes de Neón na Metrópole",
-        category: "Urbana",
-        price: 49.90,
-        author: "Camila Rocha",
-        license: "Comercial",
-        likes: 58,
-        image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1000&q=80",
-        uploadedAt: 2
-      },
-      {
-        id: "p3",
-        title: "Retrato Studio P&B",
-        category: "Pessoas",
-        price: 29.90,
-        author: "Gabriel Santos",
-        license: "Editorial",
-        likes: 12,
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80",
-        uploadedAt: 3
-      },
-      {
-        id: "p4",
-        title: "Café Gourmet Artesanal",
-        category: "Gastronomia",
-        price: 19.90,
-        author: "Beatriz Lima",
-        license: "Comercial",
-        likes: 31,
-        image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=80",
-        uploadedAt: 4
-      }
-    ];
-
-    // State Management
-    let photos = JSON.parse(localStorage.getItem('fm_photos')) || defaultPhotos;
-    let cart = JSON.parse(localStorage.getItem('fm_cart')) || [];
-    let purchasedPhotoIds = JSON.parse(localStorage.getItem('fm_purchased')) || [];
-    let activeCategory = 'all';
-    let discountRate = 0;
-    let currentUploadedImageData = null;
-
-    // Save State
-    function saveData() {
-      localStorage.setItem('fm_photos', JSON.stringify(photos));
-      localStorage.setItem('fm_cart', JSON.stringify(cart));
-      localStorage.setItem('fm_purchased', JSON.stringify(purchasedPhotoIds));
-      updateCartBadge();
-    }
-
-    // App Initialization
-    window.addEventListener('DOMContentLoaded', () => {
-      renderMarketplace();
-      updateCartBadge();
-    });
-
-    // Navigation Tabs
-    function switchTab(tab) {
-      document.getElementById('tab-explore').classList.add('hidden');
-      document.getElementById('tab-my-account').classList.add('hidden');
-      
-      document.getElementById(`tab-${tab}`).classList.remove('hidden');
-      if (tab === 'my-account') {
-        renderAccountTab();
-      }
-    }
-
-    function switchAccountSubTab(sub) {
-      const btnSelling = document.getElementById('subtab-btn-selling');
-      const btnPurchased = document.getElementById('subtab-btn-purchased');
-      const contentSelling = document.getElementById('account-selling-content');
-      const contentPurchased = document.getElementById('account-purchased-content');
-
-      if (sub === 'selling') {
-        btnSelling.className = "pb-3 text-sm font-semibold border-b-2 border-sky-500 text-sky-400";
-        btnPurchased.className = "pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
-        contentSelling.classList.remove('hidden');
-        contentPurchased.classList.add('hidden');
-      } else {
-        btnPurchased.className = "pb-3 text-sm font-semibold border-b-2 border-sky-500 text-sky-400";
-        btnSelling.className = "pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200";
-        contentPurchased.classList.remove('hidden');
-        contentSelling.classList.add('hidden');
-      }
-    }
-
-    // Render Marketplace Grid
-    function renderMarketplace() {
-      const grid = document.getElementById('photosGrid');
-      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-      const sortBy = document.getElementById('sortSelect').value;
-
-      let filtered = photos.filter(p => {
-        const matchesCat = activeCategory === 'all' || p.category === activeCategory;
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery) || p.author.toLowerCase().includes(searchQuery);
-        return matchesCat && matchesSearch;
-      });
-
-      // Sorting
-      if (sortBy === 'price-asc') filtered.sort((a,b) => a.price - b.price);
-      if (sortBy === 'price-desc') filtered.sort((a,b) => b.price - a.price);
-      if (sortBy === 'popular') filtered.sort((a,b) => b.likes - a.likes);
-      if (sortBy === 'recent') filtered.sort((a,b) => b.uploadedAt - a.uploadedAt);
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-500">
-            <i class="fa-regular fa-image text-4xl mb-3"></i>
-            <p>Nenhuma foto encontrada.</p>
-          </div>
-        `;
-        return;
-      }
-
-      grid.innerHTML = filtered.map(p => `
-        <div class="group bg-slate-800/40 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all flex flex-col">
-          
-          <div class="relative overflow-hidden cursor-pointer aspect-4/3 bg-slate-950" onclick="openPreviewModal('${p.id}')">
-            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        <!-- Feed Dinâmico -->
+        <div id="feed-posts" class="space-y-4">
             
-            <div class="absolute inset-0 watermark-overlay opacity-30 pointer-events-none"></div>
-
-            <div class="absolute top-3 left-3">
-              <span class="px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-semibold rounded-full border border-white/10">
-                ${p.category}
-              </span>
+            <!-- Post Exemplo 1 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item" data-tipo="oferecer" data-categoria="Design">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <h4 class="font-bold text-sm text-gray-900">Mariana, 18</h4>
+                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0 (28)</span>
+                            </div>
+                            <span class="text-xs text-gray-400">Há 15 minutos</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-purple-50 text-purple-600 font-bold text-xs px-2.5 py-1 rounded">Design</span>
+                        <span class="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid fa-check mr-1"></i> Oferecendo</span>
+                    </div>
+                </div>
+                <p class="text-gray-800 text-sm mb-3">Estou criando artes para Instagram e carrosséis chamativos para quem quer movimentar o perfil! Faço pacotes acessíveis.</p>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span class="font-bold text-indigo-600 text-sm">R$ 45,00 / projeto</span>
+                    <button onclick="falarNoWhatsApp('Mariana', 'Criação de Artes para Instagram')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>Chamar no WhatsApp</span>
+                    </button>
+                </div>
             </div>
 
-            <button onclick="event.stopPropagation(); likePhoto('${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/80 backdrop-blur-md text-slate-300 hover:text-rose-500 flex items-center justify-center transition-colors">
-              <i class="fa-solid fa-heart text-xs"></i>
-            </button>
-          </div>
-
-          <div class="p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <h4 class="font-bold text-white text-sm line-clamp-1 mb-1">${p.title}</h4>
-              <p class="text-xs text-slate-400 mb-3">Por <span class="text-slate-300 font-medium">${p.author}</span></p>
+            <!-- Post Exemplo 2 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item" data-tipo="precisar" data-categoria="Vídeo">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <h4 class="font-bold text-sm text-gray-900">Lucas, 19</h4>
+                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 4.9 (12)</span>
+                            </div>
+                            <span class="text-xs text-gray-400">Há 1 hora</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-blue-50 text-blue-600 font-bold text-xs px-2.5 py-1 rounded">Vídeo</span>
+                        <span class="bg-indigo-50 text-indigo-600 font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid fa-bullhorn mr-1"></i> Preciso</span>
+                    </div>
+                </div>
+                <p class="text-gray-800 text-sm mb-3">Estou precisando de alguém que saiba editar vídeos curtos estilo Reels/TikTok com legendas dinâmicas para o meu canal.</p>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span class="font-bold text-indigo-600 text-sm">Orçamento a combinar</span>
+                    <button onclick="falarNoWhatsApp('Lucas', 'Edição de Vídeos para Reels')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>Chamar no WhatsApp</span>
+                    </button>
+                </div>
             </div>
-
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-              <span class="text-base font-extrabold text-white">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
-              <button onclick="addToCart('${p.id}')" class="bg-slate-700 hover:bg-sky-500 text-white p-2 rounded-xl transition-colors">
-                <i class="fa-solid fa-cart-plus text-xs"></i>
-              </button>
-            </div>
-          </div>
 
         </div>
-      `).join('');
-    }
+    </main>
 
-    function setCategory(cat) {
-      activeCategory = cat;
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        if (btn.dataset.cat === cat) {
-          btn.className = "cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-sky-500 text-white";
-        } else {
-          btn.className = "cat-btn px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-slate-800 text-slate-300 hover:bg-slate-700";
+    <!-- Modal de Nova Publicação -->
+    <div id="modal-post" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-gray-900">Criar Publicação</h3>
+                <button onclick="fecharModalPost()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">O que você quer fazer?</label>
+                    <select id="tipo-post" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:border-indigo-500">
+                        <option value="oferecer">Quero OFERECER um serviço</option>
+                        <option value="precisar">Estou PRECISANDO de um serviço</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Categoria</label>
+                    <select id="categoria-post" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:border-indigo-500">
+                        <option value="Design">Design & Redes Sociais</option>
+                        <option value="Vídeo">Edição de Vídeo / Reels</option>
+                        <option value="Tecnologia">Tecnologia & Web</option>
+                        <option value="Aulas">Aulas & Reforço</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu Nome e Idade</label>
+                    <input type="text" id="post-autor" placeholder="Ex: João, 18" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Descrição</label>
+                    <textarea id="post-texto" rows="3" placeholder="Descreva o que você faz ou o que precisa..." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Valor / Preço</label>
+                    <input type="text" id="post-preco" placeholder="Ex: R$ 50,00 ou A combinar" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <button onclick="publicarPost()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-100">Publicar no Feed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script>
+        let filtroAtualTipo = 'todos';
+        let filtroAtualCat = 'todas';
+
+        // Simula variação de usuários online
+        setInterval(() => {
+            const spanOnline = document.getElementById('contador-online');
+            let atual = parseInt(spanOnline.innerText);
+            let variacao = Math.floor(Math.random() * 3) - 1;
+            let novoValor = Math.max(40, atual + variacao);
+            spanOnline.innerText = novoValor;
+        }, 6000);
+
+        function abrirModalPost() {
+            document.getElementById('modal-post').classList.remove('hidden');
         }
-      });
-      renderMarketplace();
-    }
 
-    function handleSearch() {
-      renderMarketplace();
-    }
+        function abrirModalComTipo(tipo) {
+            document.getElementById('tipo-post').value = tipo;
+            abrirModalPost();
+        }
 
-    function likePhoto(id) {
-      const p = photos.find(x => x.id === id);
-      if (p) {
-        p.likes++;
-        saveData();
-        renderMarketplace();
-      }
-    }
+        function fecharModalPost() {
+            document.getElementById('modal-post').classList.add('hidden');
+        }
 
-    // Modal Preview
-    function openPreviewModal(id) {
-      const p = photos.find(x => x.id === id);
-      if (!p) return;
+        function publicarPost() {
+            const tipo = document.getElementById('tipo-post').value;
+            const categoria = document.getElementById('categoria-post').value;
+            const autor = document.getElementById('post-autor').value.trim() || 'Novo Usuário, 18';
+            const texto = document.getElementById('post-texto').value.trim();
+            const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
 
-      document.getElementById('modalImage').src = p.image;
-      document.getElementById('modalTitle').innerText = p.title;
-      document.getElementById('modalAuthor').innerText = p.author;
-      document.getElementById('modalCategory').innerText = p.category;
-      document.getElementById('modalLicense').innerText = p.license;
-      document.getElementById('modalPrice').innerText = `R$ ${p.price.toFixed(2).replace('.', ',')}`;
-      
-      const btn = document.getElementById('modalAddToCartBtn');
-      btn.onclick = () => {
-        addToCart(p.id);
-        closePreviewModal();
-      };
+            if (!texto) {
+                alert('Escreva alguma coisa na descrição!');
+                return;
+            }
 
-      document.getElementById('previewModal').classList.remove('hidden');
-    }
+            const feed = document.getElementById('feed-posts');
+            const badgeClass = tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600';
+            const badgeIcon = tipo === 'oferecer' ? 'fa-check' : 'fa-bullhorn';
+            const badgeText = tipo === 'oferecer' ? 'Oferecendo' : 'Preciso';
 
-    function closePreviewModal() {
-      document.getElementById('previewModal').classList.add('hidden');
-    }
+            let catColor = 'bg-gray-100 text-gray-700';
+            if (categoria === 'Design') catColor = 'bg-purple-50 text-purple-600';
+            if (categoria === 'Vídeo') catColor = 'bg-blue-50 text-blue-600';
+            if (categoria === 'Tecnologia') catColor = 'bg-emerald-50 text-emerald-600';
+            if (categoria === 'Aulas') catColor = 'bg-amber-50 text-amber-600';
 
-    // Modal Sell
-    function openSellModal() {
-      document.getElementById('sellModal').classList.remove('hidden');
-    }
+            const novoPost = document.createElement('div');
+            novoPost.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item';
+            novoPost.setAttribute('data-tipo', tipo);
+            novoPost.setAttribute('data-categoria', categoria);
+            
+            novoPost.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <h4 class="font-bold text-sm text-gray-900">${autor}</h4>
+                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0 (Novo)</span>
+                            </div>
+                            <span class="text-xs text-gray-400">Agora mesmo</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="${catColor} font-bold text-xs px-2.5 py-1 rounded">${categoria}</span>
+                        <span class="${badgeClass} font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid ${badgeIcon} mr-1"></i> ${badgeText}</span>
+                    </div>
+                </div>
+                <p class="text-gray-800 text-sm mb-3">${texto}</p>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span class="font-bold text-indigo-600 text-sm">${preco}</span>
+                    <button onclick="falarNoWhatsApp('${autor.split(',')[0]}', '${texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>Chamar no WhatsApp</span>
+                    </button>
+                </div>
+            `;
 
-    function closeSellModal() {
-      document.getElementById('sellModal').classList.add('hidden');
-    }
+            feed.prepend(novoPost);
+            fecharModalPost();
+            aplicarFiltros();
 
-    function handleFileSelect(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          currentUploadedImageData = evt.target.result;
-          document.getElementById('uploadPlaceholder').classList.add('hidden');
-          const preview = document.getElementById('uploadPreview');
-          preview.src = evt.target.result;
-          preview.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+            document.getElementById('post-texto').value = '';
+            document.getElementById('post-autor').value = '';
+            document.getElementById('post-preco').value = '';
+        }
 
-    function handleSellSubmit(e) {
-      e.preventDefault();
-      if (!currentUploadedImageData) return alert('Por favor, selecione uma imagem.');
+        function filtrarFeed(valor, tipoFiltro) {
+            if (tipoFiltro === 'tipo') {
+                filtroAtualTipo = valor;
+                ['todos', 'oferecer', 'precisar'].forEach(t => {
+                    const btn = document.getElementById(`btn-tipo-${t}`);
+                    if (t === valor) {
+                        btn.className = 'bg-indigo-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-full shadow-sm transition';
+                    } else {
+                        btn.className = 'bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition';
+                    }
+                });
+            } else {
+                filtroAtualCat = valor;
+                ['todas', 'Design', 'Vídeo', 'Tecnologia', 'Aulas'].forEach(c => {
+                    const btn = document.getElementById(`btn-cat-${c}`);
+                    if (btn) {
+                        if (c === valor) {
+                            btn.className = 'bg-gray-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition';
+                        } else {
+                            btn.className = 'bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition';
+                        }
+                    }
+                });
+            }
+            aplicarFiltros();
+        }
 
-      const newPhoto = {
-        id: 'p_' + Date.now(),
-        title: document.getElementById('sellTitle').value,
-        category: document.getElementById('sellCategory').value,
-        price: parseFloat(document.getElementById('sellPrice').value),
-        license: document.getElementById('sellLicense').value,
-        author: 'Você (Você)',
-        likes: 0,
-        image: currentUploadedImageData,
-        uploadedAt: Date.now()
-      };
+        function aplicarFiltros() {
+            const posts = document.querySelectorAll('.post-item');
+            posts.forEach(post => {
+                const tipoPost = post.getAttribute('data-tipo');
+                const catPost = post.getAttribute('data-categoria');
 
-      photos.unshift(newPhoto);
-      saveData();
-      renderMarketplace();
-      closeSellModal();
-      
-      // Reset form
-      document.getElementById('sellForm').reset();
-      document.getElementById('uploadPlaceholder').classList.remove('hidden');
-      document.getElementById('uploadPreview').classList.add('hidden');
-      currentUploadedImageData = null;
+                const combinaTipo = (filtroAtualTipo === 'todos' || tipoPost === filtroAtualTipo);
+                const combinaCat = (filtroAtualCat === 'todas' || catPost === filtroAtualCat);
 
-      alert('Foto anunciada com sucesso!');
-    }
+                if (combinaTipo && combinaCat) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        }
 
-    // Cart Logic
-    function toggleCartDrawer() {
-      const drawer = document.getElementById('cartDrawer');
-      drawer.classList.toggle('translate-x-full');
-      renderCart();
-    }
-
-    function addToCart(id) {
-      if (!cart.includes(id)) {
-        cart.push(id);
-        saveData();
-        renderCart();
-      }
-      toggleCartDrawer();
-    }
-
-    function removeFromCart(id) {
-      cart = cart.filter(x => x !== id);
-      saveData();
-      renderCart();
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cartItemsContainer');
-      const cartPhotos = photos.filter(p => cart.includes(p.id));
-
-      if (cartPhotos.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 text-slate-500">
-            <i class="fa-solid fa-cart-arrow-down text-3xl mb-2"></i>
-            <p class="text-xs">Seu carrinho está vazio.</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = cartPhotos.map(p => `
-          <div class="flex items-center gap-3 bg-slate-800/40 p-3 rounded-xl border border-slate-800">
-            <img src="${p.image}" class="w-14 h-14 object-cover rounded-lg">
-            <div class="flex-1 min-w-0">
-              <h5 class="text-xs font-bold text-white truncate">${p.title}</h5>
-              <p class="text-[10px] text-slate-400">Licença ${p.license}</p>
-              <span class="text-xs font-bold text-sky-400">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <button onclick="removeFromCart('${p.id}')" class="text-slate-500 hover:text-rose-400 p-1">
-              <i class="fa-solid fa-trash text-xs"></i>
-            </button>
-          </div>
-        `).join('');
-      }
-
-      // Calculations
-      const subtotal = cartPhotos.reduce((acc, p) => acc + p.price, 0);
-      const discount = subtotal * discountRate;
-      const total = subtotal - discount;
-
-      document.getElementById('cartSubtotal').innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-      document.getElementById('cartDiscount').innerText = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
-      document.getElementById('cartTotal').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    }
-
-    function applyCoupon() {
-      const code = document.getElementById('couponInput').value.trim().toUpperCase();
-      if (code === 'FOTO10') {
-        discountRate = 0.10;
-        alert('Cupom de 10% de desconto aplicado!');
-      } else {
-        discountRate = 0;
-        alert('Cupom inválido.');
-      }
-      renderCart();
-    }
-
-    function updateCartBadge() {
-      const badge = document.getElementById('cartCountBadge');
-      if (cart.length > 0) {
-        badge.innerText = cart.length;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-    }
-
-    function simulateCheckout() {
-      if (cart.length === 0) return alert('Seu carrinho está vazio.');
-      
-      purchasedPhotoIds = [...new Set([...purchasedPhotoIds, ...cart])];
-      cart = [];
-      saveData();
-      toggleCartDrawer();
-      alert('Pagamento aprovado! Suas fotos foram adicionadas em "Minha Conta" para download.');
-      switchTab('my-account');
-      switchAccountSubTab('purchased');
-    }
-
-    // Account Tab Logic
-    function renderAccountTab() {
-      // My Selling Photos
-      const mySelling = photos.filter(p => p.author.includes('Você'));
-      document.getElementById('statTotalPhotos').innerText = mySelling.length;
-      document.getElementById('statTotalSales').innerText = mySelling.length * 2; // Simulated
-      const totalEarnings = mySelling.reduce((acc, p) => acc + (p.price * 2), 0);
-      document.getElementById('statTotalEarnings').innerText = `R$ ${totalEarnings.toFixed(2).replace('.', ',')}`;
-
-      const sellingContainer = document.getElementById('mySellingList');
-      if (mySelling.length === 0) {
-        sellingContainer.innerHTML = `<p class="col-span-full text-slate-500 text-xs text-center py-8">Você ainda não colocou nenhuma foto à venda.</p>`;
-      } else {
-        sellingContainer.innerHTML = mySelling.map(p => `
-          <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-3 flex gap-3 items-center">
-            <img src="${p.image}" class="w-16 h-16 object-cover rounded-xl">
-            <div class="flex-1 min-w-0">
-              <h5 class="text-xs font-bold text-white truncate">${p.title}</h5>
-              <p class="text-[10px] text-slate-400">Preço: R$ ${p.price.toFixed(2)}</p>
-              <span class="text-[10px] text-emerald-400 font-semibold">2 Vendas efetuadas</span>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      // My Purchased Photos
-      const purchased = photos.filter(p => purchasedPhotoIds.includes(p.id));
-      const purchasedContainer = document.getElementById('myPurchasedList');
-
-      if (purchased.length === 0) {
-        purchasedContainer.innerHTML = `<p class="col-span-full text-slate-500 text-xs text-center py-8">Você ainda não comprou nenhuma foto.</p>`;
-      } else {
-        purchasedContainer.innerHTML = purchased.map(p => `
-          <div class="bg-slate-800/40 border border-slate-800 rounded-2xl overflow-hidden">
-            <img src="${p.image}" class="w-full h-36 object-cover">
-            <div class="p-3">
-              <h5 class="text-xs font-bold text-white truncate mb-2">${p.title}</h5>
-              <a href="${p.image}" download="FotoMarket_${p.id}.jpg" target="_blank" class="w-full bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                <i class="fa-solid fa-download"></i>
-                <span>Download Sem Marca D'Água</span>
-              </a>
-            </div>
-          </div>
-        `).join('');
-      }
-    }
-  </script>
+        function falarNoWhatsApp(nome, assunto) {
+            const numeroWhatsApp = "5511999999999"; // Substitua pelo seu número oficial de suporte ou WhatsApp padrão
+            const mensagem = `Olá, ${nome}! Vi sua publicação "${assunto}" no JobJovem e gostaria de conversar a respeito.`;
+            const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+    </script>
 </body>
 </html>

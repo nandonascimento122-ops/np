@@ -95,7 +95,7 @@
                 <p class="text-gray-800 text-sm mb-3">Estou criando artes para Instagram e carrosséis chamativos para quem quer movimentar o perfil! Faço pacotes acessíveis.</p>
                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span class="font-bold text-indigo-600 text-sm">R$ 45,00 / projeto</span>
-                    <button onclick="falarNoWhatsApp('Mariana', 'Criação de Artes para Instagram')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <button onclick="falarNoWhatsApp('5511988888888', 'Mariana', 'Criação de Artes para Instagram')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Chamar no WhatsApp</span>
                     </button>
@@ -123,7 +123,7 @@
                 <p class="text-gray-800 text-sm mb-3">Estou precisando de alguém que saiba editar vídeos curtos estilo Reels/TikTok com legendas dinâmicas para o meu canal.</p>
                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span class="font-bold text-indigo-600 text-sm">Orçamento a combinar</span>
-                    <button onclick="falarNoWhatsApp('Lucas', 'Edição de Vídeos para Reels')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <button onclick="falarNoWhatsApp('5511977777777', 'Lucas', 'Edição de Vídeos para Reels')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Chamar no WhatsApp</span>
                     </button>
@@ -135,7 +135,7 @@
 
     <!-- Modal de Nova Publicação -->
     <div id="modal-post" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg text-gray-900">Criar Publicação</h3>
                 <button onclick="fecharModalPost()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -162,6 +162,11 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu Nome e Idade</label>
                     <input type="text" id="post-autor" placeholder="Ex: João, 18" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu WhatsApp (com DDD)</label>
+                    <input type="text" id="post-whatsapp" placeholder="Ex: 11999999999" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                    <span class="text-[11px] text-gray-400 mt-1 block">Apenas números com DDD (ex: 11988887777)</span>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Descrição</label>
@@ -207,6 +212,7 @@
             const tipo = document.getElementById('tipo-post').value;
             const categoria = document.getElementById('categoria-post').value;
             const autor = document.getElementById('post-autor').value.trim() || 'Novo Usuário, 18';
+            const whatsapp = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); // Remove caracteres não numéricos
             const texto = document.getElementById('post-texto').value.trim();
             const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
 
@@ -214,6 +220,14 @@
                 alert('Escreva alguma coisa na descrição!');
                 return;
             }
+
+            if (!whatsapp || whatsapp.length < 10) {
+                alert('Por favor, informe um número de WhatsApp válido com DDD!');
+                return;
+            }
+
+            // Garante o prefixo do Brasil (55) se o usuário não colocou
+            const numeroCompleto = whatsapp.startsWith('55') ? whatsapp : '55' + whatsapp;
 
             const feed = document.getElementById('feed-posts');
             const badgeClass = tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600';
@@ -251,7 +265,7 @@
                 <p class="text-gray-800 text-sm mb-3">${texto}</p>
                 <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span class="font-bold text-indigo-600 text-sm">${preco}</span>
-                    <button onclick="falarNoWhatsApp('${autor.split(',')[0]}', '${texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <button onclick="falarNoWhatsApp('${numeroCompleto}', '${autor.split(',')[0]}', '${texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
                         <span>Chamar no WhatsApp</span>
                     </button>
@@ -262,8 +276,10 @@
             fecharModalPost();
             aplicarFiltros();
 
+            // Limpa os campos
             document.getElementById('post-texto').value = '';
             document.getElementById('post-autor').value = '';
+            document.getElementById('post-whatsapp').value = '';
             document.getElementById('post-preco').value = '';
         }
 
@@ -311,10 +327,9 @@
             });
         }
 
-        function falarNoWhatsApp(nome, assunto) {
-            const numeroWhatsApp = "5511999999999"; // Substitua pelo seu número oficial de suporte ou WhatsApp padrão
+        function falarNoWhatsApp(numero, nome, assunto) {
             const mensagem = `Olá, ${nome}! Vi sua publicação "${assunto}" no JobJovem e gostaria de conversar a respeito.`;
-            const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+            const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
         }
     </script>

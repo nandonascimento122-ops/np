@@ -73,63 +73,7 @@
 
         <!-- Feed Dinâmico -->
         <div id="feed-posts" class="space-y-4">
-            
-            <!-- Post Exemplo 1 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item" data-tipo="oferecer" data-categoria="Design">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
-                        <div>
-                            <div class="flex items-center space-x-1.5">
-                                <h4 class="font-bold text-sm text-gray-900">Mariana, 18</h4>
-                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0 (28)</span>
-                            </div>
-                            <span class="text-xs text-gray-400">Há 15 minutos</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="bg-purple-50 text-purple-600 font-bold text-xs px-2.5 py-1 rounded">Design</span>
-                        <span class="bg-emerald-50 text-emerald-600 font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid fa-check mr-1"></i> Oferecendo</span>
-                    </div>
-                </div>
-                <p class="text-gray-800 text-sm mb-3">Estou criando artes para Instagram e carrosséis chamativos para quem quer movimentar o perfil! Faço pacotes acessíveis.</p>
-                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <span class="font-bold text-indigo-600 text-sm">R$ 45,00 / projeto</span>
-                    <button onclick="falarNoWhatsApp('5511988888888', 'Mariana', 'Criação de Artes para Instagram')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
-                        <i class="fa-brands fa-whatsapp text-sm"></i>
-                        <span>Chamar no WhatsApp</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Post Exemplo 2 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item" data-tipo="precisar" data-categoria="Vídeo">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
-                        <div>
-                            <div class="flex items-center space-x-1.5">
-                                <h4 class="font-bold text-sm text-gray-900">Lucas, 19</h4>
-                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 4.9 (12)</span>
-                            </div>
-                            <span class="text-xs text-gray-400">Há 1 hora</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="bg-blue-50 text-blue-600 font-bold text-xs px-2.5 py-1 rounded">Vídeo</span>
-                        <span class="bg-indigo-50 text-indigo-600 font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid fa-bullhorn mr-1"></i> Preciso</span>
-                    </div>
-                </div>
-                <p class="text-gray-800 text-sm mb-3">Estou precisando de alguém que saiba editar vídeos curtos estilo Reels/TikTok com legendas dinâmicas para o meu canal.</p>
-                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <span class="font-bold text-indigo-600 text-sm">Orçamento a combinar</span>
-                    <button onclick="falarNoWhatsApp('5511977777777', 'Lucas', 'Edição de Vídeos para Reels')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
-                        <i class="fa-brands fa-whatsapp text-sm"></i>
-                        <span>Chamar no WhatsApp</span>
-                    </button>
-                </div>
-            </div>
-
+            <!-- As postagens serão carregadas aqui via JavaScript -->
         </div>
     </main>
 
@@ -181,18 +125,52 @@
         </div>
     </div>
 
-    <!-- Script Principal -->
+    <!-- Script Principal com Armazenamento Local -->
     <script>
         let filtroAtualTipo = 'todos';
         let filtroAtualCat = 'todas';
 
-        // Simula variação natural de usuários online em tempo real
+        // Posts padrão iniciais caso o storage esteja vazio
+        const postsIniciais = [
+            {
+                tipo: 'oferecer',
+                categoria: 'Design',
+                autor: 'Mariana, 18',
+                whatsapp: '5511988888888',
+                texto: 'Estou criando artes para Instagram e carrosséis chamativos para quem quer movimentar o perfil! Faço pacotes acessíveis.',
+                preco: 'R$ 45,00 / projeto',
+                tempo: 'Há 15 minutos',
+                foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100'
+            },
+            {
+                tipo: 'precisar',
+                categoria: 'Vídeo',
+                autor: 'Lucas, 19',
+                whatsapp: '5511977777777',
+                texto: 'Estou precisando de alguém que saiba editar vídeos curtos estilo Reels/TikTok com legendas dinâmicas para o meu canal.',
+                preco: 'Orçamento a combinar',
+                tempo: 'Há 1 hora',
+                foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'
+            }
+        ];
+
+        // Carrega os posts ao abrir a página
+        window.onload = function() {
+            if (!localStorage.getItem('jobjovem_posts')) {
+                localStorage.setItem('jobjovem_posts', JSON.stringify(postsIniciais));
+            }
+            carregarFeed();
+        };
+
+        // Simula variação de usuários online
         setInterval(() => {
             const spanOnline = document.getElementById('contador-online');
-            let atual = parseInt(spanOnline.innerText);
-            let variacao = Math.floor(Math.random() * 3) - 1; // -1, 0 ou +1
-            let novoValor = Math.max(45, atual + variacao);
-            spanOnline.innerText = novoValor;
+            if(spanOnline) {
+                let atual = parseInt(spanOnline.innerText);
+                let variacao = Math.floor(Math.random() * 3) - 1;
+                let novoValor = Math.max(45, atual + variacao);
+                spanOnline.innerText = novoValor;
+            }
         }, 5000);
 
         function abrirModalPost() {
@@ -212,7 +190,7 @@
             const tipo = document.getElementById('tipo-post').value;
             const categoria = document.getElementById('categoria-post').value;
             const autor = document.getElementById('post-autor').value.trim() || 'Novo Usuário, 18';
-            const whatsapp = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); 
+            const whatsappInput = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); 
             const texto = document.getElementById('post-texto').value.trim();
             const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
 
@@ -221,64 +199,91 @@
                 return;
             }
 
-            if (!whatsapp || whatsapp.length < 10) {
+            if (!whatsappInput || whatsappInput.length < 10) {
                 alert('Por favor, informe um número de WhatsApp válido com DDD!');
                 return;
             }
 
-            const numeroCompleto = whatsapp.startsWith('55') ? whatsapp : '55' + whatsapp;
+            const whatsapp = whatsappInput.startsWith('55') ? whatsappInput : '55' + whatsappInput;
 
-            const feed = document.getElementById('feed-posts');
-            const badgeClass = tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600';
-            const badgeIcon = tipo === 'oferecer' ? 'fa-check' : 'fa-bullhorn';
-            const badgeText = tipo === 'oferecer' ? 'Oferecendo' : 'Preciso';
+            const novoPost = {
+                tipo,
+                categoria,
+                autor,
+                whatsapp,
+                texto,
+                preco,
+                tempo: 'Agora mesmo',
+                foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+            };
 
-            let catColor = 'bg-gray-100 text-gray-700';
-            if (categoria === 'Design') catColor = 'bg-purple-50 text-purple-600';
-            if (categoria === 'Vídeo') catColor = 'bg-blue-50 text-blue-600';
-            if (categoria === 'Tecnologia') catColor = 'bg-emerald-50 text-emerald-600';
-            if (categoria === 'Aulas') catColor = 'bg-amber-50 text-amber-600';
+            // Pega os posts salvos, adiciona o novo no início e salva de novo
+            let posts = JSON.parse(localStorage.getItem('jobjovem_posts')) || [];
+            posts.unshift(novoPost);
+            localStorage.setItem('jobjovem_posts', JSON.stringify(posts));
 
-            const novoPost = document.createElement('div');
-            novoPost.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item';
-            novoPost.setAttribute('data-tipo', tipo);
-            novoPost.setAttribute('data-categoria', categoria);
-            
-            novoPost.innerHTML = `
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
-                        <div>
-                            <div class="flex items-center space-x-1.5">
-                                <h4 class="font-bold text-sm text-gray-900">${autor}</h4>
-                                <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0 (Novo)</span>
-                            </div>
-                            <span class="text-xs text-gray-400">Agora mesmo</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="${catColor} font-bold text-xs px-2.5 py-1 rounded">${categoria}</span>
-                        <span class="${badgeClass} font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid ${badgeIcon} mr-1"></i> ${badgeText}</span>
-                    </div>
-                </div>
-                <p class="text-gray-800 text-sm mb-3">${texto}</p>
-                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <span class="font-bold text-indigo-600 text-sm">${preco}</span>
-                    <button onclick="falarNoWhatsApp('${numeroCompleto}', '${autor.split(',')[0]}', '${texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
-                        <i class="fa-brands fa-whatsapp text-sm"></i>
-                        <span>Chamar no WhatsApp</span>
-                    </button>
-                </div>
-            `;
-
-            feed.prepend(novoPost);
+            carregarFeed();
             fecharModalPost();
-            aplicarFiltros();
 
+            // Limpa os campos
             document.getElementById('post-texto').value = '';
             document.getElementById('post-autor').value = '';
             document.getElementById('post-whatsapp').value = '';
             document.getElementById('post-preco').value = '';
+        }
+
+        function carregarFeed() {
+            const feed = document.getElementById('feed-posts');
+            const posts = JSON.parse(localStorage.getItem('jobjovem_posts')) || [];
+            
+            feed.innerHTML = '';
+
+            posts.forEach(post => {
+                const badgeClass = post.tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600';
+                const badgeIcon = post.tipo === 'oferecer' ? 'fa-check' : 'fa-bullhorn';
+                const badgeText = post.tipo === 'oferecer' ? 'Oferecendo' : 'Preciso';
+
+                let catColor = 'bg-gray-100 text-gray-700';
+                if (post.categoria === 'Design') catColor = 'bg-purple-50 text-purple-600';
+                if (post.categoria === 'Vídeo') catColor = 'bg-blue-50 text-blue-600';
+                if (post.categoria === 'Tecnologia') catColor = 'bg-emerald-50 text-emerald-600';
+                if (post.categoria === 'Aulas') catColor = 'bg-amber-50 text-amber-600';
+
+                const postDiv = document.createElement('div');
+                postDiv.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item';
+                postDiv.setAttribute('data-tipo', post.tipo);
+                postDiv.setAttribute('data-categoria', post.categoria);
+                
+                postDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <img src="${post.foto}" class="w-10 h-10 rounded-full object-cover">
+                            <div>
+                                <div class="flex items-center space-x-1.5">
+                                    <h4 class="font-bold text-sm text-gray-900">${post.autor}</h4>
+                                    <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0</span>
+                                </div>
+                                <span class="text-xs text-gray-400">${post.tempo}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="${catColor} font-bold text-xs px-2.5 py-1 rounded">${post.categoria}</span>
+                            <span class="${badgeClass} font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid ${badgeIcon} mr-1"></i> ${badgeText}</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-800 text-sm mb-3">${post.texto}</p>
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <span class="font-bold text-indigo-600 text-sm">${post.preco}</span>
+                        <button onclick="falarNoWhatsApp('${post.whatsapp}', '${post.autor.split(',')[0]}', '${post.texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                            <span>Chamar no WhatsApp</span>
+                        </button>
+                    </div>
+                `;
+                feed.appendChild(postDiv);
+            });
+
+            aplicarFiltros();
         }
 
         function filtrarFeed(valor, tipoFiltro) {

@@ -108,6 +108,11 @@
                     <input type="text" id="post-autor" placeholder="Ex: João, 18" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Link da sua Foto (opcional)</label>
+                    <input type="url" id="post-foto" placeholder="Ex: https://link-da-sua-foto.jpg" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
+                    <span class="text-[11px] text-gray-400 mt-1 block">Cole o link de uma foto da internet ou deixe vazio para usar a padrão.</span>
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu WhatsApp (com DDD)</label>
                     <input type="text" id="post-whatsapp" placeholder="Ex: 11999999999" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
                     <span class="text-[11px] text-gray-400 mt-1 block">Apenas números com DDD (ex: 11988887777)</span>
@@ -127,16 +132,13 @@
 
     <!-- Script de Nuvem Compartilhada -->
     <script>
-        // Endpoint público compartilhado para testes globais automáticos
-        const BIN_ID = '65e921b0dc74654018b1d62c'; // ID de bin compartilhado público
+        const BIN_ID = '65e921b0dc74654018b1d62c';
         const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const API_KEY = '$2a$10$7R0Z1Qv3w2xK7W6L...'; // Chave pública de leitura/gravação aberta
 
         let filtroAtualTipo = 'todos';
         let filtroAtualCat = 'todas';
         let postsGlobais = [];
 
-        // Carrega os posts da nuvem ao abrir a página
         window.onload = function() {
             carregarFeed();
         };
@@ -165,7 +167,6 @@
             document.getElementById('modal-post').classList.add('hidden');
         }
 
-        // Função para buscar posts da nuvem para todo mundo
         async function carregarFeed() {
             const feed = document.getElementById('feed-posts');
             try {
@@ -177,7 +178,6 @@
                     const data = await response.json();
                     postsGlobais = data.record.posts || [];
                 } else {
-                    // Fallback local se a API exceder limite momentâneo
                     postsGlobais = JSON.parse(localStorage.getItem('jobjovem_posts_nuvem')) || [
                         { tipo: 'oferecer', categoria: 'Design', autor: 'Mariana, 18', whatsapp: '5511988888888', texto: 'Criando artes para Instagram e carrosséis chamativos! Faço pacotes acessíveis.', preco: 'R$ 45,00', tempo: 'Há 15 min', foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100' }
                     ];
@@ -209,6 +209,8 @@
                 if (post.categoria === 'Tecnologia') catColor = 'bg-emerald-50 text-emerald-600';
                 if (post.categoria === 'Aulas') catColor = 'bg-amber-50 text-amber-600';
 
+                const fotoPerfil = post.foto && post.foto.startsWith('http') ? post.foto : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
+
                 const postDiv = document.createElement('div');
                 postDiv.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item';
                 postDiv.setAttribute('data-tipo', post.tipo);
@@ -217,7 +219,7 @@
                 postDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center space-x-3">
-                            <img src="${post.foto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'}" class="w-10 h-10 rounded-full object-cover">
+                            <img src="${fotoPerfil}" class="w-10 h-10 rounded-full object-cover">
                             <div>
                                 <div class="flex items-center space-x-1.5">
                                     <h4 class="font-bold text-sm text-gray-900">${post.autor}</h4>
@@ -246,11 +248,11 @@
             aplicarFiltros();
         }
 
-        // Função para publicar e mandar direto pra nuvem global
         async function publicarPost() {
             const tipo = document.getElementById('tipo-post').value;
             const categoria = document.getElementById('categoria-post').value;
             const autor = document.getElementById('post-autor').value.trim() || 'Novo Jovem, 18';
+            const foto = document.getElementById('post-foto').value.trim();
             const whatsappInput = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); 
             const texto = document.getElementById('post-texto').value.trim();
             const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
@@ -271,11 +273,11 @@
                 tipo,
                 categoria,
                 autor,
+                foto,
                 whatsapp,
                 texto,
                 preco,
-                tempo: 'Agora mesmo',
-                foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+                tempo: 'Agora mesmo'
             };
 
             const btnPublicar = document.getElementById('btn-publicar');
@@ -294,7 +296,6 @@
                     body: JSON.stringify({ posts: postsGlobais })
                 });
             } catch (e) {
-                // Salva localmente caso ocorra falha de rede temporária
                 localStorage.setItem('jobjovem_posts_nuvem', JSON.stringify(postsGlobais));
             }
 
@@ -307,6 +308,7 @@
             // Limpa os campos
             document.getElementById('post-texto').value = '';
             document.getElementById('post-autor').value = '';
+            document.getElementById('post-foto').value = '';
             document.getElementById('post-whatsapp').value = '';
             document.getElementById('post-preco').value = '';
         }

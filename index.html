@@ -11,12 +11,9 @@
 <body class="bg-gray-100 text-gray-800 font-sans antialiased">
 
 <header class="bg-white shadow-sm sticky top-0 z-40">
-  <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-    <div class="flex items-center space-x-2">
-      <span class="bg-indigo-600 text-white p-2 rounded-xl text-xl"><i class="fa-solid fa-bolt"></i></span>
-      <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
-    </div>
-    <button id="btn-atualizar" class="bg-indigo-50 text-indigo-600 font-semibold px-3 py-2 rounded-xl hover:bg-indigo-100 transition text-xs"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+  <div class="max-w-2xl mx-auto px-4 py-3 flex items-center space-x-2">
+    <span class="bg-indigo-600 text-white p-2 rounded-xl text-xl"><i class="fa-solid fa-bolt"></i></span>
+    <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
   </div>
 </header>
 
@@ -31,10 +28,7 @@
 
   <div id="filtros-tipo" class="flex space-x-2 mb-3"></div>
   <div id="filtros-cat" class="flex space-x-2 overflow-x-auto pb-3 mb-4"></div>
-
-  <div id="feed" class="space-y-4" aria-live="polite">
-    <div class="text-center py-8 text-gray-400 text-sm">Carregando publicações...</div>
-  </div>
+  <div id="feed" class="space-y-4"></div>
 </main>
 
 <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
@@ -56,16 +50,18 @@
         <option value="Outros">Outros</option>
       </select>
       <input id="autor" maxlength="40" placeholder="Seu primeiro nome (ex: João)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
-      <input id="foto" type="url" maxlength="300" placeholder="Link https da sua foto (opcional)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+      <div class="flex items-center space-x-3">
+        <img id="foto-previa" src="" alt="" class="w-14 h-14 rounded-full object-cover bg-gray-100">
+        <label class="flex-1 cursor-pointer bg-gray-50 border border-dashed border-gray-300 rounded-xl p-3 text-center text-gray-600 hover:bg-gray-100">
+          <i class="fa-solid fa-camera"></i> <span id="foto-rotulo">Escolher minha foto (opcional)</span>
+          <input id="foto" type="file" accept="image/*" class="hidden">
+        </label>
+      </div>
       <input id="whatsapp" inputmode="numeric" maxlength="15" placeholder="WhatsApp com DDD (ex: 11999999999)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
       <textarea id="texto" rows="3" maxlength="400" placeholder="Descreva o que você faz ou precisa..." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3"></textarea>
       <input id="preco" maxlength="30" placeholder="Valor (ex: R$ 50,00 ou A combinar)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
-      <label class="flex items-start space-x-2 text-xs text-gray-600">
-        <input type="checkbox" id="aceite" class="mt-0.5">
-        <span>Entendo que meu WhatsApp ficará visível publicamente. Se tenho menos de 18 anos, tenho autorização de um responsável.</span>
-      </label>
       <p id="erro-form" class="text-xs text-red-600 hidden"></p>
-      <button id="btn-publicar" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">Enviar publicação</button>
+      <button id="btn-publicar" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">Publicar</button>
     </div>
   </div>
 </div>
@@ -73,104 +69,106 @@
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl hidden z-50"></div>
 
 <script>
-/* ===== CONFIGURAÇÃO =====
-   A chave "anon" do Supabase é pública por design: a segurança vem das
-   políticas RLS (só leitura de posts aprovados + inserção). Nunca use aqui
-   a chave service_role nem uma "master key". */
-const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-const SUPABASE_ANON_KEY = 'SUA-CHAVE-ANON';
-
-const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+const CHAVE = 'jobjovem_posts_v1';
 const FOTO_PADRAO = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
 const CATEGORIAS = ['Design', 'Vídeo', 'Tecnologia', 'Aulas'];
 const COR_CAT = { Design: 'bg-purple-50 text-purple-600', 'Vídeo': 'bg-blue-50 text-blue-600', Tecnologia: 'bg-emerald-50 text-emerald-600', Aulas: 'bg-amber-50 text-amber-600' };
+const EXEMPLOS = [
+  { id: 'ex1', tipo: 'oferecer', categoria: 'Design', autor: 'Mariana', foto: '', whatsapp: '5511988888888', texto: 'Crio artes para Instagram e carrosséis. Pacotes acessíveis. (post de exemplo)', preco: 'R$ 45,00', created_at: new Date(Date.now() - 15 * 60000).toISOString() },
+  { id: 'ex2', tipo: 'precisar', categoria: 'Aulas', autor: 'Carlos', foto: '', whatsapp: '5511977777777', texto: 'Preciso de reforço em matemática para o Enem. (post de exemplo)', preco: 'A combinar', created_at: new Date(Date.now() - 3 * 3600000).toISOString() }
+];
 
 let posts = [], filtroTipo = 'todos', filtroCat = 'todas';
 const $ = id => document.getElementById(id);
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+/* ===== Armazenamento (isolado aqui para trocar por um servidor depois) ===== */
+function ler() { try { const v = JSON.parse(localStorage.getItem(CHAVE)); if (Array.isArray(v)) return v; } catch {} return [...EXEMPLOS]; }
+function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(posts)); return true; } catch { return false; } }
+
+/* ===== Utilidades ===== */
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function fotoSegura(url) {
+  if (typeof url === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(url)) return url;
   try { const u = new URL(url); return u.protocol === 'https:' ? u.href : FOTO_PADRAO; } catch { return FOTO_PADRAO; }
 }
-function tempoRelativo(iso) {
-  const min = Math.floor((Date.now() - new Date(iso)) / 60000);
-  if (min < 1) return 'Agora mesmo';
-  if (min < 60) return `Há ${min} min`;
-  if (min < 1440) return `Há ${Math.floor(min / 60)} h`;
-  return `Há ${Math.floor(min / 1440)} d`;
+/* Recorta em quadrado e reduz para 160px (JPEG), para ocupar pouco espaço */
+let fotoEscolhida = '';
+function prepararFoto(arquivo) {
+  return new Promise((ok, falha) => {
+    const img = new Image(), url = URL.createObjectURL(arquivo);
+    img.onload = () => {
+      const lado = Math.min(img.width, img.height), c = document.createElement('canvas');
+      c.width = c.height = 160;
+      c.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, 160, 160);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); falha(); };
+    img.src = url;
+  });
 }
-function toast(msg) {
-  const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
-  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 3500);
+$('foto').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (!f.type.startsWith('image/')) { erroForm('Escolha um arquivo de imagem.'); return; }
+  try {
+    fotoEscolhida = await prepararFoto(f);
+    $('foto-previa').src = fotoEscolhida; $('foto-rotulo').textContent = 'Trocar foto'; erroForm('');
+  } catch { erroForm('Não foi possível ler essa imagem. Tente outra.'); }
+});
+function tempo(iso) {
+  const m = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return 'Agora mesmo'; if (m < 60) return `Há ${m} min`;
+  if (m < 1440) return `Há ${Math.floor(m / 60)} h`; return `Há ${Math.floor(m / 1440)} d`;
 }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 3000); }
 
 /* ===== Filtros ===== */
 function desenharFiltros() {
   const on = 'bg-indigo-600 text-white', off = 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50';
   $('filtros-tipo').innerHTML = [['todos', 'Todos'], ['oferecer', 'Oferecendo'], ['precisar', 'Precisando']]
     .map(([v, l]) => `<button data-tipo="${v}" class="${v === filtroTipo ? on : off} font-semibold text-xs px-3.5 py-1.5 rounded-full">${l}</button>`).join('');
-  const onC = 'bg-gray-800 text-white', offC = off;
   $('filtros-cat').innerHTML = [['todas', 'Todas categorias'], ...CATEGORIAS.map(c => [c, c])]
-    .map(([v, l]) => `<button data-cat="${esc(v)}" class="${v === filtroCat ? onC : offC} text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap">${esc(l)}</button>`).join('');
+    .map(([v, l]) => `<button data-cat="${esc(v)}" class="${v === filtroCat ? 'bg-gray-800 text-white' : off} text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap">${esc(l)}</button>`).join('');
 }
-$('filtros-tipo').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (b) { filtroTipo = b.dataset.tipo; desenharFiltros(); desenharPosts(); } });
-$('filtros-cat').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (b) { filtroCat = b.dataset.cat; desenharFiltros(); desenharPosts(); } });
+$('filtros-tipo').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (b) { filtroTipo = b.dataset.tipo; desenharFiltros(); desenhar(); } });
+$('filtros-cat').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (b) { filtroCat = b.dataset.cat; desenharFiltros(); desenhar(); } });
 
 /* ===== Feed ===== */
-async function carregarFeed() {
-  try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=id,created_at,tipo,categoria,autor,foto,whatsapp,texto,preco&order=created_at.desc&limit=100`, { headers: HEADERS });
-    if (!r.ok) throw new Error(r.status);
-    posts = await r.json();
-    desenharPosts();
-  } catch {
-    $('feed').innerHTML = '<div class="text-center py-8 text-red-500 text-sm">Não foi possível carregar o feed. Toque em Atualizar para tentar de novo.</div>';
-  }
-}
-
-function desenharPosts() {
+function desenhar() {
   const lista = posts.filter(p => (filtroTipo === 'todos' || p.tipo === filtroTipo) && (filtroCat === 'todas' || p.categoria === filtroCat));
   if (!lista.length) { $('feed').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Nenhuma publicação aqui ainda. Publique a primeira!</div>'; return; }
-  $('feed').innerHTML = lista.map(p => {
-    const of = p.tipo === 'oferecer';
-    return `<article class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+  $('feed').innerHTML = lista.map(p => `
+    <article class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center space-x-3">
           <img src="${esc(fotoSegura(p.foto))}" referrerpolicy="no-referrer" alt="" class="w-10 h-10 rounded-full object-cover">
-          <div><h4 class="font-bold text-sm text-gray-900">${esc(p.autor)}</h4><span class="text-xs text-gray-400">${tempoRelativo(p.created_at)}</span></div>
+          <div><h4 class="font-bold text-sm text-gray-900">${esc(p.autor)}</h4><span class="text-xs text-gray-400">${tempo(p.created_at)}</span></div>
         </div>
         <div class="flex items-center space-x-2">
           <span class="${COR_CAT[p.categoria] || 'bg-gray-100 text-gray-700'} font-bold text-xs px-2.5 py-1 rounded">${esc(p.categoria)}</span>
-          <span class="${of ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'} font-bold text-xs px-2.5 py-1 rounded-full">${of ? 'Oferecendo' : 'Preciso'}</span>
+          <span class="${p.tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'} font-bold text-xs px-2.5 py-1 rounded-full">${p.tipo === 'oferecer' ? 'Oferecendo' : 'Preciso'}</span>
         </div>
       </div>
       <p class="text-gray-800 text-sm mb-3 break-words">${esc(p.texto)}</p>
       <div class="flex items-center justify-between pt-3 border-t border-gray-100">
         <span class="font-bold text-indigo-600 text-sm">${esc(p.preco)}</span>
         <div class="flex items-center space-x-2">
-          <button data-denunciar="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-flag"></i> Denunciar</button>
+          ${p.meu ? `<button data-excluir="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-trash"></i> Excluir</button>`
+                  : `<button data-ocultar="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-flag"></i> Denunciar</button>`}
           <button data-zap="${esc(p.id)}" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl"><i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp</button>
         </div>
       </div>
-    </article>`;
-  }).join('');
+    </article>`).join('');
 }
 
-$('feed').addEventListener('click', async e => {
-  const zap = e.target.closest('[data-zap]'), den = e.target.closest('[data-denunciar]');
+$('feed').addEventListener('click', e => {
+  const zap = e.target.closest('[data-zap]'), exc = e.target.closest('[data-excluir]'), ocu = e.target.closest('[data-ocultar]');
   if (zap) {
-    const p = posts.find(x => String(x.id) === zap.dataset.zap); if (!p) return;
+    const p = posts.find(x => x.id === zap.dataset.zap); if (!p) return;
     const msg = `Olá, ${p.autor}! Vi sua publicação no JobJovem e gostaria de conversar.`;
     window.open(`https://wa.me/${encodeURIComponent(p.whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   }
-  if (den && confirm('Denunciar esta publicação para a moderação?')) {
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/denuncias`, { method: 'POST', headers: { ...HEADERS, Prefer: 'return=minimal' }, body: JSON.stringify({ post_id: den.dataset.denunciar }) });
-      toast(r.ok ? 'Denúncia enviada. Obrigado!' : 'Não foi possível enviar a denúncia.');
-    } catch { toast('Sem conexão. Tente novamente.'); }
-  }
+  if (exc && confirm('Excluir sua publicação?')) { posts = posts.filter(x => x.id !== exc.dataset.excluir); salvar(); desenhar(); }
+  if (ocu && confirm('Denunciar e ocultar esta publicação?')) { posts = posts.filter(x => x.id !== ocu.dataset.ocultar); salvar(); desenhar(); toast('Publicação ocultada.'); }
 });
 
 /* ===== Modal e publicação ===== */
@@ -180,40 +178,29 @@ function erroForm(msg) { const e = $('erro-form'); e.textContent = msg; e.classL
 $('abrir-modal').addEventListener('click', () => abrirModal());
 document.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', () => abrirModal(b.dataset.abrir)));
 $('fechar-modal').addEventListener('click', fecharModal);
-$('btn-atualizar').addEventListener('click', carregarFeed);
 
-$('btn-publicar').addEventListener('click', async () => {
-  const autor = $('autor').value.trim(), texto = $('texto').value.trim();
+$('btn-publicar').addEventListener('click', () => {
+  const autor = $('autor').value.trim(), texto = $('texto').value.trim(), foto = fotoEscolhida;
   const zap = $('whatsapp').value.replace(/\D/g, '');
-  const foto = $('foto').value.trim();
   if (!autor) return erroForm('Informe seu nome.');
   if (texto.length < 10) return erroForm('A descrição precisa ter pelo menos 10 caracteres.');
   if (zap.length < 10 || zap.length > 13) return erroForm('Informe um WhatsApp válido com DDD.');
-  if (foto && !/^https:\/\//i.test(foto)) return erroForm('O link da foto deve começar com https://');
-  if (!$('aceite').checked) return erroForm('Marque a caixa de ciência para publicar.');
   erroForm('');
-
-  const btn = $('btn-publicar'); btn.disabled = true; btn.textContent = 'Enviando...';
-  const corpo = {
-    tipo: $('tipo').value, categoria: $('categoria').value, autor, foto: foto || null,
+  posts.unshift({
+    id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7), meu: true, created_at: new Date().toISOString(),
+    tipo: $('tipo').value, categoria: $('categoria').value, autor, foto,
     whatsapp: zap.startsWith('55') ? zap : '55' + zap, texto, preco: $('preco').value.trim() || 'A combinar'
-  };
-  try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/posts`, { method: 'POST', headers: { ...HEADERS, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) });
-    if (!r.ok) throw new Error(r.status);
-    ['autor', 'foto', 'whatsapp', 'texto', 'preco'].forEach(id => $(id).value = '');
-    $('aceite').checked = false;
-    fecharModal();
-    toast('Publicação enviada! Ela aparece no feed depois da aprovação.');
-  } catch {
-    erroForm('Não foi possível publicar agora. Verifique sua conexão e tente de novo.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Enviar publicação';
-  }
+  });
+  if (!salvar()) toast('Publicado, mas o navegador não conseguiu guardar. Ao fechar a página, ele some.');
+  else toast('Publicado!');
+  ['autor', 'foto', 'whatsapp', 'texto', 'preco'].forEach(id => $(id).value = '');
+  fotoEscolhida = ''; $('foto-previa').removeAttribute('src'); $('foto-rotulo').textContent = 'Escolher minha foto (opcional)';
+  fecharModal(); desenhar();
 });
 
+posts = ler();
 desenharFiltros();
-carregarFeed();
+desenhar();
 </script>
 </body>
 </html>

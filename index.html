@@ -1,367 +1,219 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobJovem - Talentos da Nova Geração</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobJovem - Talentos da Nova Geração</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased">
 
-    <!-- Header / Navbar -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2">
-                    <span class="bg-indigo-600 text-white p-2 rounded-xl font-bold text-xl"><i class="fa-solid fa-bolt"></i></span>
-                    <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
-                </div>
-                <!-- Indicador de Usuários Online em Tempo Real -->
-                <div class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                    <span class="relative flex h-2.5 w-2.5">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                    </span>
-                    <span class="text-xs font-bold text-emerald-700"><span id="contador-online">54</span> online</span>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button onclick="carregarFeed()" class="bg-indigo-50 text-indigo-600 font-semibold px-3 py-2 rounded-xl hover:bg-indigo-100 transition text-xs flex items-center space-x-1"><i class="fa-solid fa-rotate"></i> <span>Atualizar</span></button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-2xl mx-auto px-4 py-6">
-
-        <!-- Caixa de Publicação (Estilo Facebook) -->
-        <div class="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-200">
-            <div class="flex items-center space-x-3 mb-3">
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" class="w-10 h-10 rounded-full object-cover">
-                <input type="text" placeholder="O que você está precisando ou quer oferecer?" class="w-full bg-gray-100 hover:bg-gray-200/65 transition px-4 py-2.5 rounded-full text-sm focus:outline-none cursor-pointer" onclick="abrirModalPost()" readonly>
-            </div>
-            <div class="flex border-t border-gray-100 pt-3 justify-around">
-                <button onclick="abrirModalComTipo('oferecer')" class="flex items-center space-x-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm transition">
-                    <i class="fa-solid fa-hand-holding-dollar text-emerald-500 text-base"></i>
-                    <span>Oferecer Serviço</span>
-                </button>
-                <button onclick="abrirModalComTipo('precisar')" class="flex items-center space-x-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm transition">
-                    <i class="fa-solid fa-bullhorn text-indigo-500 text-base"></i>
-                    <span>Estou Precisando</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Abas de Filtro Principal (Tipo) -->
-        <div class="flex space-x-2 mb-3">
-            <button onclick="filtrarFeed('todos', 'tipo')" id="btn-tipo-todos" class="bg-indigo-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-full shadow-sm transition">Todos</button>
-            <button onclick="filtrarFeed('oferecer', 'tipo')" id="btn-tipo-oferecer" class="bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition">Oferecendo</button>
-            <button onclick="filtrarFeed('precisar', 'tipo')" id="btn-tipo-precisar" class="bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition">Precisando</button>
-        </div>
-
-        <!-- Filtros por Categoria -->
-        <div class="flex space-x-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-            <button onclick="filtrarFeed('todas', 'cat')" id="btn-cat-todas" class="bg-gray-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition">Todas Categorias</button>
-            <button onclick="filtrarFeed('Design', 'cat')" id="btn-cat-Design" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Design</button>
-            <button onclick="filtrarFeed('Vídeo', 'cat')" id="btn-cat-Vídeo" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Vídeos</button>
-            <button onclick="filtrarFeed('Tecnologia', 'cat')" id="btn-cat-Tecnologia" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Tecnologia</button>
-            <button onclick="filtrarFeed('Aulas', 'cat')" id="btn-cat-Aulas" class="bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition">Aulas</button>
-        </div>
-
-        <!-- Feed Dinâmico (Sincronizado na nuvem) -->
-        <div id="feed-posts" class="space-y-4">
-            <div class="text-center py-8 text-gray-400 text-sm">Carregando publicações em tempo real...</div>
-        </div>
-    </main>
-
-    <!-- Modal de Nova Publicação -->
-    <div id="modal-post" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg text-gray-900">Criar Publicação</h3>
-                <button onclick="fecharModalPost()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">O que você quer fazer?</label>
-                    <select id="tipo-post" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:border-indigo-500">
-                        <option value="oferecer">Quero OFERECER um serviço</option>
-                        <option value="precisar">Estou PRECISANDO de um serviço</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Categoria</label>
-                    <select id="categoria-post" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:border-indigo-500">
-                        <option value="Design">Design & Redes Sociais</option>
-                        <option value="Vídeo">Edição de Vídeo / Reels</option>
-                        <option value="Tecnologia">Tecnologia & Web</option>
-                        <option value="Aulas">Aulas & Reforço</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu Nome e Idade</label>
-                    <input type="text" id="post-autor" placeholder="Ex: João, 18" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Link da sua Foto (opcional)</label>
-                    <input type="url" id="post-foto" placeholder="Ex: https://link-da-sua-foto.jpg" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
-                    <span class="text-[11px] text-gray-400 mt-1 block">Cole o link de uma foto da internet ou deixe vazio para usar a padrão.</span>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Seu WhatsApp (com DDD)</label>
-                    <input type="text" id="post-whatsapp" placeholder="Ex: 11999999999" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
-                    <span class="text-[11px] text-gray-400 mt-1 block">Apenas números com DDD (ex: 11988887777)</span>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Descrição</label>
-                    <textarea id="post-texto" rows="3" placeholder="Descreva o que você faz ou o que precisa..." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Valor / Preço</label>
-                    <input type="text" id="post-preco" placeholder="Ex: R$ 50,00 ou A combinar" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-                <button onclick="publicarPost()" id="btn-publicar" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-100">Publicar no Feed</button>
-            </div>
-        </div>
+<header class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <span class="bg-indigo-600 text-white p-2 rounded-xl text-xl"><i class="fa-solid fa-bolt"></i></span>
+      <span class="text-2xl font-black text-indigo-600 tracking-tight">Job<span class="text-gray-900">Jovem</span></span>
     </div>
+    <button id="btn-atualizar" class="bg-indigo-50 text-indigo-600 font-semibold px-3 py-2 rounded-xl hover:bg-indigo-100 transition text-xs"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+  </div>
+</header>
 
-    <!-- Script de Nuvem Compartilhada -->
-    <script>
-        const BIN_ID = '65e921b0dc74654018b1d62c';
-        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+<main class="max-w-2xl mx-auto px-4 py-6">
+  <div class="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-200">
+    <input type="text" placeholder="O que você está precisando ou quer oferecer?" class="w-full bg-gray-100 hover:bg-gray-200 transition px-4 py-2.5 rounded-full text-sm focus:outline-none cursor-pointer" id="abrir-modal" readonly>
+    <div class="flex border-t border-gray-100 mt-3 pt-3 justify-around">
+      <button data-abrir="oferecer" class="text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm"><i class="fa-solid fa-hand-holding-dollar text-emerald-500"></i> Oferecer serviço</button>
+      <button data-abrir="precisar" class="text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium text-sm"><i class="fa-solid fa-bullhorn text-indigo-500"></i> Estou precisando</button>
+    </div>
+  </div>
 
-        let filtroAtualTipo = 'todos';
-        let filtroAtualCat = 'todas';
-        let postsGlobais = [];
+  <div id="filtros-tipo" class="flex space-x-2 mb-3"></div>
+  <div id="filtros-cat" class="flex space-x-2 overflow-x-auto pb-3 mb-4"></div>
 
-        window.onload = function() {
-            carregarFeed();
-        };
+  <div id="feed" class="space-y-4" aria-live="polite">
+    <div class="text-center py-8 text-gray-400 text-sm">Carregando publicações...</div>
+  </div>
+</main>
 
-        // Simula variação de usuários online
-        setInterval(() => {
-            const spanOnline = document.getElementById('contador-online');
-            if(spanOnline) {
-                let atual = parseInt(spanOnline.innerText);
-                let variacao = Math.floor(Math.random() * 3) - 1;
-                let novoValor = Math.max(45, atual + variacao);
-                spanOnline.innerText = novoValor;
-            }
-        }, 5000);
+<div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-bold text-lg">Criar publicação</h3>
+      <button id="fechar-modal" aria-label="Fechar" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="space-y-3 text-sm">
+      <select id="tipo" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+        <option value="oferecer">Quero OFERECER um serviço</option>
+        <option value="precisar">Estou PRECISANDO de um serviço</option>
+      </select>
+      <select id="categoria" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+        <option value="Design">Design e redes sociais</option>
+        <option value="Vídeo">Edição de vídeo / Reels</option>
+        <option value="Tecnologia">Tecnologia e web</option>
+        <option value="Aulas">Aulas e reforço</option>
+        <option value="Outros">Outros</option>
+      </select>
+      <input id="autor" maxlength="40" placeholder="Seu primeiro nome (ex: João)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+      <input id="foto" type="url" maxlength="300" placeholder="Link https da sua foto (opcional)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+      <input id="whatsapp" inputmode="numeric" maxlength="15" placeholder="WhatsApp com DDD (ex: 11999999999)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+      <textarea id="texto" rows="3" maxlength="400" placeholder="Descreva o que você faz ou precisa..." class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3"></textarea>
+      <input id="preco" maxlength="30" placeholder="Valor (ex: R$ 50,00 ou A combinar)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3">
+      <label class="flex items-start space-x-2 text-xs text-gray-600">
+        <input type="checkbox" id="aceite" class="mt-0.5">
+        <span>Entendo que meu WhatsApp ficará visível publicamente. Se tenho menos de 18 anos, tenho autorização de um responsável.</span>
+      </label>
+      <p id="erro-form" class="text-xs text-red-600 hidden"></p>
+      <button id="btn-publicar" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">Enviar publicação</button>
+    </div>
+  </div>
+</div>
 
-        function abrirModalPost() {
-            document.getElementById('modal-post').classList.remove('hidden');
-        }
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl hidden z-50"></div>
 
-        function abrirModalComTipo(tipo) {
-            document.getElementById('tipo-post').value = tipo;
-            abrirModalPost();
-        }
+<script>
+/* ===== CONFIGURAÇÃO =====
+   A chave "anon" do Supabase é pública por design: a segurança vem das
+   políticas RLS (só leitura de posts aprovados + inserção). Nunca use aqui
+   a chave service_role nem uma "master key". */
+const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
+const SUPABASE_ANON_KEY = 'SUA-CHAVE-ANON';
 
-        function fecharModalPost() {
-            document.getElementById('modal-post').classList.add('hidden');
-        }
+const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+const FOTO_PADRAO = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
+const CATEGORIAS = ['Design', 'Vídeo', 'Tecnologia', 'Aulas'];
+const COR_CAT = { Design: 'bg-purple-50 text-purple-600', 'Vídeo': 'bg-blue-50 text-blue-600', Tecnologia: 'bg-emerald-50 text-emerald-600', Aulas: 'bg-amber-50 text-amber-600' };
 
-        async function carregarFeed() {
-            const feed = document.getElementById('feed-posts');
-            try {
-                const response = await fetch(API_URL + '/latest', {
-                    headers: { 'X-Master-Key': '$2a$10$rK4S8fX1qW7Y9z...' }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    postsGlobais = data.record.posts || [];
-                } else {
-                    postsGlobais = JSON.parse(localStorage.getItem('jobjovem_posts_nuvem')) || [
-                        { tipo: 'oferecer', categoria: 'Design', autor: 'Mariana, 18', whatsapp: '5511988888888', texto: 'Criando artes para Instagram e carrosséis chamativos! Faço pacotes acessíveis.', preco: 'R$ 45,00', tempo: 'Há 15 min', foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100' }
-                    ];
-                }
-            } catch (error) {
-                postsGlobais = JSON.parse(localStorage.getItem('jobjovem_posts_nuvem')) || [];
-            }
+let posts = [], filtroTipo = 'todos', filtroCat = 'todas';
+const $ = id => document.getElementById(id);
 
-            renderizarPosts();
-        }
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function fotoSegura(url) {
+  try { const u = new URL(url); return u.protocol === 'https:' ? u.href : FOTO_PADRAO; } catch { return FOTO_PADRAO; }
+}
+function tempoRelativo(iso) {
+  const min = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (min < 1) return 'Agora mesmo';
+  if (min < 60) return `Há ${min} min`;
+  if (min < 1440) return `Há ${Math.floor(min / 60)} h`;
+  return `Há ${Math.floor(min / 1440)} d`;
+}
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 3500);
+}
 
-        function renderizarPosts() {
-            const feed = document.getElementById('feed-posts');
-            feed.innerHTML = '';
+/* ===== Filtros ===== */
+function desenharFiltros() {
+  const on = 'bg-indigo-600 text-white', off = 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50';
+  $('filtros-tipo').innerHTML = [['todos', 'Todos'], ['oferecer', 'Oferecendo'], ['precisar', 'Precisando']]
+    .map(([v, l]) => `<button data-tipo="${v}" class="${v === filtroTipo ? on : off} font-semibold text-xs px-3.5 py-1.5 rounded-full">${l}</button>`).join('');
+  const onC = 'bg-gray-800 text-white', offC = off;
+  $('filtros-cat').innerHTML = [['todas', 'Todas categorias'], ...CATEGORIAS.map(c => [c, c])]
+    .map(([v, l]) => `<button data-cat="${esc(v)}" class="${v === filtroCat ? onC : offC} text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap">${esc(l)}</button>`).join('');
+}
+$('filtros-tipo').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (b) { filtroTipo = b.dataset.tipo; desenharFiltros(); desenharPosts(); } });
+$('filtros-cat').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (b) { filtroCat = b.dataset.cat; desenharFiltros(); desenharPosts(); } });
 
-            if (postsGlobais.length === 0) {
-                feed.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Nenhuma publicação no momento. Seja o primeiro a publicar!</div>';
-                return;
-            }
+/* ===== Feed ===== */
+async function carregarFeed() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=id,created_at,tipo,categoria,autor,foto,whatsapp,texto,preco&order=created_at.desc&limit=100`, { headers: HEADERS });
+    if (!r.ok) throw new Error(r.status);
+    posts = await r.json();
+    desenharPosts();
+  } catch {
+    $('feed').innerHTML = '<div class="text-center py-8 text-red-500 text-sm">Não foi possível carregar o feed. Toque em Atualizar para tentar de novo.</div>';
+  }
+}
 
-            postsGlobais.forEach(post => {
-                const badgeClass = post.tipo === 'oferecer' ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600';
-                const badgeIcon = post.tipo === 'oferecer' ? 'fa-check' : 'fa-bullhorn';
-                const badgeText = post.tipo === 'oferecer' ? 'Oferecendo' : 'Preciso';
+function desenharPosts() {
+  const lista = posts.filter(p => (filtroTipo === 'todos' || p.tipo === filtroTipo) && (filtroCat === 'todas' || p.categoria === filtroCat));
+  if (!lista.length) { $('feed').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Nenhuma publicação aqui ainda. Publique a primeira!</div>'; return; }
+  $('feed').innerHTML = lista.map(p => {
+    const of = p.tipo === 'oferecer';
+    return `<article class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-3">
+          <img src="${esc(fotoSegura(p.foto))}" referrerpolicy="no-referrer" alt="" class="w-10 h-10 rounded-full object-cover">
+          <div><h4 class="font-bold text-sm text-gray-900">${esc(p.autor)}</h4><span class="text-xs text-gray-400">${tempoRelativo(p.created_at)}</span></div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="${COR_CAT[p.categoria] || 'bg-gray-100 text-gray-700'} font-bold text-xs px-2.5 py-1 rounded">${esc(p.categoria)}</span>
+          <span class="${of ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-indigo-600'} font-bold text-xs px-2.5 py-1 rounded-full">${of ? 'Oferecendo' : 'Preciso'}</span>
+        </div>
+      </div>
+      <p class="text-gray-800 text-sm mb-3 break-words">${esc(p.texto)}</p>
+      <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+        <span class="font-bold text-indigo-600 text-sm">${esc(p.preco)}</span>
+        <div class="flex items-center space-x-2">
+          <button data-denunciar="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-flag"></i> Denunciar</button>
+          <button data-zap="${esc(p.id)}" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl"><i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp</button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
 
-                let catColor = 'bg-gray-100 text-gray-700';
-                if (post.categoria === 'Design') catColor = 'bg-purple-50 text-purple-600';
-                if (post.categoria === 'Vídeo') catColor = 'bg-blue-50 text-blue-600';
-                if (post.categoria === 'Tecnologia') catColor = 'bg-emerald-50 text-emerald-600';
-                if (post.categoria === 'Aulas') catColor = 'bg-amber-50 text-amber-600';
+$('feed').addEventListener('click', async e => {
+  const zap = e.target.closest('[data-zap]'), den = e.target.closest('[data-denunciar]');
+  if (zap) {
+    const p = posts.find(x => String(x.id) === zap.dataset.zap); if (!p) return;
+    const msg = `Olá, ${p.autor}! Vi sua publicação no JobJovem e gostaria de conversar.`;
+    window.open(`https://wa.me/${encodeURIComponent(p.whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+  }
+  if (den && confirm('Denunciar esta publicação para a moderação?')) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/denuncias`, { method: 'POST', headers: { ...HEADERS, Prefer: 'return=minimal' }, body: JSON.stringify({ post_id: den.dataset.denunciar }) });
+      toast(r.ok ? 'Denúncia enviada. Obrigado!' : 'Não foi possível enviar a denúncia.');
+    } catch { toast('Sem conexão. Tente novamente.'); }
+  }
+});
 
-                const fotoPerfil = post.foto && post.foto.startsWith('http') ? post.foto : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
+/* ===== Modal e publicação ===== */
+function abrirModal(tipo) { if (tipo) $('tipo').value = tipo; $('modal').classList.remove('hidden'); $('modal').classList.add('flex'); }
+function fecharModal() { $('modal').classList.add('hidden'); $('modal').classList.remove('flex'); }
+function erroForm(msg) { const e = $('erro-form'); e.textContent = msg; e.classList.toggle('hidden', !msg); }
+$('abrir-modal').addEventListener('click', () => abrirModal());
+document.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', () => abrirModal(b.dataset.abrir)));
+$('fechar-modal').addEventListener('click', fecharModal);
+$('btn-atualizar').addEventListener('click', carregarFeed);
 
-                const postDiv = document.createElement('div');
-                postDiv.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 p-5 post-item';
-                postDiv.setAttribute('data-tipo', post.tipo);
-                postDiv.setAttribute('data-categoria', post.categoria);
-                
-                postDiv.innerHTML = `
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center space-x-3">
-                            <img src="${fotoPerfil}" class="w-10 h-10 rounded-full object-cover">
-                            <div>
-                                <div class="flex items-center space-x-1.5">
-                                    <h4 class="font-bold text-sm text-gray-900">${post.autor}</h4>
-                                    <span class="text-xs text-yellow-500 font-bold"><i class="fa-solid fa-star"></i> 5.0</span>
-                                </div>
-                                <span class="text-xs text-gray-400">${post.tempo}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="${catColor} font-bold text-xs px-2.5 py-1 rounded">${post.categoria}</span>
-                            <span class="${badgeClass} font-bold text-xs px-2.5 py-1 rounded-full"><i class="fa-solid ${badgeIcon} mr-1"></i> ${badgeText}</span>
-                        </div>
-                    </div>
-                    <p class="text-gray-800 text-sm mb-3">${post.texto}</p>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <span class="font-bold text-indigo-600 text-sm">${post.preco}</span>
-                        <button onclick="falarNoWhatsApp('${post.whatsapp}', '${post.autor.split(',')[0]}', '${post.texto.substring(0, 20)}...')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
-                            <i class="fa-brands fa-whatsapp text-sm"></i>
-                            <span>Chamar no WhatsApp</span>
-                        </button>
-                    </div>
-                `;
-                feed.appendChild(postDiv);
-            });
+$('btn-publicar').addEventListener('click', async () => {
+  const autor = $('autor').value.trim(), texto = $('texto').value.trim();
+  const zap = $('whatsapp').value.replace(/\D/g, '');
+  const foto = $('foto').value.trim();
+  if (!autor) return erroForm('Informe seu nome.');
+  if (texto.length < 10) return erroForm('A descrição precisa ter pelo menos 10 caracteres.');
+  if (zap.length < 10 || zap.length > 13) return erroForm('Informe um WhatsApp válido com DDD.');
+  if (foto && !/^https:\/\//i.test(foto)) return erroForm('O link da foto deve começar com https://');
+  if (!$('aceite').checked) return erroForm('Marque a caixa de ciência para publicar.');
+  erroForm('');
 
-            aplicarFiltros();
-        }
+  const btn = $('btn-publicar'); btn.disabled = true; btn.textContent = 'Enviando...';
+  const corpo = {
+    tipo: $('tipo').value, categoria: $('categoria').value, autor, foto: foto || null,
+    whatsapp: zap.startsWith('55') ? zap : '55' + zap, texto, preco: $('preco').value.trim() || 'A combinar'
+  };
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/posts`, { method: 'POST', headers: { ...HEADERS, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) });
+    if (!r.ok) throw new Error(r.status);
+    ['autor', 'foto', 'whatsapp', 'texto', 'preco'].forEach(id => $(id).value = '');
+    $('aceite').checked = false;
+    fecharModal();
+    toast('Publicação enviada! Ela aparece no feed depois da aprovação.');
+  } catch {
+    erroForm('Não foi possível publicar agora. Verifique sua conexão e tente de novo.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar publicação';
+  }
+});
 
-        async function publicarPost() {
-            const tipo = document.getElementById('tipo-post').value;
-            const categoria = document.getElementById('categoria-post').value;
-            const autor = document.getElementById('post-autor').value.trim() || 'Novo Jovem, 18';
-            const foto = document.getElementById('post-foto').value.trim();
-            const whatsappInput = document.getElementById('post-whatsapp').value.trim().replace(/\D/g, ''); 
-            const texto = document.getElementById('post-texto').value.trim();
-            const preco = document.getElementById('post-preco').value.trim() || 'A combinar';
-
-            if (!texto) {
-                alert('Escreva alguma coisa na descrição!');
-                return;
-            }
-
-            if (!whatsappInput || whatsappInput.length < 10) {
-                alert('Por favor, informe um número de WhatsApp válido com DDD!');
-                return;
-            }
-
-            const whatsapp = whatsappInput.startsWith('55') ? whatsappInput : '55' + whatsappInput;
-
-            const novoPost = {
-                tipo,
-                categoria,
-                autor,
-                foto,
-                whatsapp,
-                texto,
-                preco,
-                tempo: 'Agora mesmo'
-            };
-
-            const btnPublicar = document.getElementById('btn-publicar');
-            btnPublicar.innerText = 'Publicando...';
-            btnPublicar.disabled = true;
-
-            postsGlobais.unshift(novoPost);
-
-            try {
-                await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$rK4S8fX1qW7Y9z...'
-                    },
-                    body: JSON.stringify({ posts: postsGlobais })
-                });
-            } catch (e) {
-                localStorage.setItem('jobjovem_posts_nuvem', JSON.stringify(postsGlobais));
-            }
-
-            btnPublicar.innerText = 'Publicar no Feed';
-            btnPublicar.disabled = false;
-
-            renderizarPosts();
-            fecharModalPost();
-
-            // Limpa os campos
-            document.getElementById('post-texto').value = '';
-            document.getElementById('post-autor').value = '';
-            document.getElementById('post-foto').value = '';
-            document.getElementById('post-whatsapp').value = '';
-            document.getElementById('post-preco').value = '';
-        }
-
-        function filtrarFeed(valor, tipoFiltro) {
-            if (tipoFiltro === 'tipo') {
-                filtroAtualTipo = valor;
-                ['todos', 'oferecer', 'precisar'].forEach(t => {
-                    const btn = document.getElementById(`btn-tipo-${t}`);
-                    if (t === valor) {
-                        btn.className = 'bg-indigo-600 text-white font-semibold text-xs px-3.5 py-1.5 rounded-full shadow-sm transition';
-                    } else {
-                        btn.className = 'bg-white text-gray-600 font-semibold text-xs px-3.5 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition';
-                    }
-                });
-            } else {
-                filtroAtualCat = valor;
-                ['todas', 'Design', 'Vídeo', 'Tecnologia', 'Aulas'].forEach(c => {
-                    const btn = document.getElementById(`btn-cat-${c}`);
-                    if (btn) {
-                        if (c === valor) {
-                            btn.className = 'bg-gray-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap transition';
-                        } else {
-                            btn.className = 'bg-white text-gray-600 border border-gray-200 text-xs font-medium px-3 py-1.5 rounded-lg whitespace-nowrap hover:bg-gray-50 transition';
-                        }
-                    }
-                });
-            }
-            aplicarFiltros();
-        }
-
-        function aplicarFiltros() {
-            const posts = document.querySelectorAll('.post-item');
-            posts.forEach(post => {
-                const tipoPost = post.getAttribute('data-tipo');
-                const catPost = post.getAttribute('data-categoria');
-
-                const combinaTipo = (filtroAtualTipo === 'todos' || tipoPost === filtroAtualTipo);
-                const combinaCat = (filtroAtualCat === 'todas' || catPost === filtroAtualCat);
-
-                if (combinaTipo && combinaCat) {
-                    post.style.display = 'block';
-                } else {
-                    post.style.display = 'none';
-                }
-            });
-        }
-
-        function falarNoWhatsApp(numero, nome, assunto) {
-            const mensagem = `Olá, ${nome}! Vi sua publicação "${assunto}" no JobJovem e gostaria de conversar a respeito.`;
-            const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
-            window.open(url, '_blank');
-        }
-    </script>
+desenharFiltros();
+carregarFeed();
+</script>
 </body>
 </html>

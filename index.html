@@ -69,21 +69,56 @@
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl hidden z-50"></div>
 
 <script>
-const CHAVE = 'jobjovem_posts_v1';
+/* ===== CONFIGURAÇÃO =====
+   1) Acesse https://jsonblob.com, apague o texto, escreva [] e clique em Save.
+   2) Copie o final do endereço (o código depois de jsonblob.com/) e cole abaixo. */
+const BLOB_ID = '01a10f72-85d0-7670-9888-d53de7ab7a9a';
+
 const FOTO_PADRAO = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100';
 const CATEGORIAS = ['Design', 'Vídeo', 'Tecnologia', 'Aulas'];
 const COR_CAT = { Design: 'bg-purple-50 text-purple-600', 'Vídeo': 'bg-blue-50 text-blue-600', Tecnologia: 'bg-emerald-50 text-emerald-600', Aulas: 'bg-amber-50 text-amber-600' };
-const EXEMPLOS = [
-  { id: 'ex1', tipo: 'oferecer', categoria: 'Design', autor: 'Mariana', foto: '', whatsapp: '5511988888888', texto: 'Crio artes para Instagram e carrosséis. Pacotes acessíveis. (post de exemplo)', preco: 'R$ 45,00', created_at: new Date(Date.now() - 15 * 60000).toISOString() },
-  { id: 'ex2', tipo: 'precisar', categoria: 'Aulas', autor: 'Carlos', foto: '', whatsapp: '5511977777777', texto: 'Preciso de reforço em matemática para o Enem. (post de exemplo)', preco: 'A combinar', created_at: new Date(Date.now() - 3 * 3600000).toISOString() }
-];
+const BK = 'jobjovem_backup', MEUS = 'jobjovem_meus', OCULTOS = 'jobjovem_ocultos', ULTIMO = 'jobjovem_ultimo';
 
 let posts = [], filtroTipo = 'todos', filtroCat = 'todas';
 const $ = id => document.getElementById(id);
 
-/* ===== Armazenamento (isolado aqui para trocar por um servidor depois) ===== */
-function ler() { try { const v = JSON.parse(localStorage.getItem(CHAVE)); if (Array.isArray(v)) return v; } catch {} return [...EXEMPLOS]; }
-function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(posts)); return true; } catch { return false; } }
+/* ===== Armazenamento compartilhado ===== */
+const URL_BLOB = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID;
+const CAB = { 'Content-Type': 'application/json', Accept: 'application/json' };
+function lerLS(k, padrao) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? padrao; } catch { return padrao; } }
+function salvarLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+const meus = new Set(lerLS(MEUS, [])), ocultos = new Set(lerLS(OCULTOS, []));
+
+/* Só aceita itens com formato esperado: lixo injetado por terceiros é descartado */
+function valido(p) {
+  return p && typeof p.id === 'string' && p.id.length < 40 && ['oferecer', 'precisar'].includes(p.tipo)
+    && typeof p.categoria === 'string' && typeof p.autor === 'string' && p.autor.length <= 40
+    && typeof p.texto === 'string' && p.texto.length <= 400 && typeof p.preco === 'string' && p.preco.length <= 30
+    && /^\d{10,15}$/.test(p.whatsapp) && !isNaN(new Date(p.created_at))
+    && (!p.foto || (typeof p.foto === 'string' && p.foto.length < 40000));
+}
+async function baixar() { const r = await fetch(URL_BLOB, { headers: CAB }); if (!r.ok) throw new Error(r.status); const d = await r.json(); return (Array.isArray(d) ? d : []).filter(valido); }
+async function enviar(lista) { const r = await fetch(URL_BLOB, { method: 'PUT', headers: CAB, body: JSON.stringify(lista.slice(0, 300)) }); if (!r.ok) throw new Error(r.status); }
+function unir(a, b) { const m = new Map(); [...a, ...b].forEach(p => m.set(p.id, p)); return [...m.values()].sort((x, y) => new Date(y.created_at) - new Date(x.created_at)).slice(0, 300); }
+
+/* Carrega o feed. Se o servidor perdeu mais da metade dos posts que este aparelho já viu,
+   considera que houve apagão e restaura a partir da cópia local. */
+async function carregar() {
+  if (BLOB_ID === 'COLE-AQUI-O-ID') { $('feed').innerHTML = '<div class="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-2xl p-4">Falta configurar o servidor: crie o espaço em jsonblob.com e cole o código no começo do script (BLOB_ID).</div>'; return; }
+  try {
+    let remoto = await baixar();
+    const bk = lerLS(BK, []).filter(valido);
+    if (bk.length >= 3 && remoto.length < bk.length * 0.5) {
+      remoto = unir(bk, remoto);
+      try { await enviar(remoto); toast('O feed foi restaurado a partir de uma cópia.'); } catch {}
+    }
+    posts = remoto; salvarLS(BK, posts);
+  } catch {
+    posts = lerLS(BK, []).filter(valido);
+    toast('Sem conexão com o servidor. Mostrando a última cópia.');
+  }
+  desenhar();
+}
 
 /* ===== Utilidades ===== */
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -134,7 +169,7 @@ $('filtros-cat').addEventListener('click', e => { const b = e.target.closest('[d
 
 /* ===== Feed ===== */
 function desenhar() {
-  const lista = posts.filter(p => (filtroTipo === 'todos' || p.tipo === filtroTipo) && (filtroCat === 'todas' || p.categoria === filtroCat));
+  const lista = posts.filter(p => !ocultos.has(p.id) && (filtroTipo === 'todos' || p.tipo === filtroTipo) && (filtroCat === 'todas' || p.categoria === filtroCat));
   if (!lista.length) { $('feed').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">Nenhuma publicação aqui ainda. Publique a primeira!</div>'; return; }
   $('feed').innerHTML = lista.map(p => `
     <article class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
@@ -152,7 +187,7 @@ function desenhar() {
       <div class="flex items-center justify-between pt-3 border-t border-gray-100">
         <span class="font-bold text-indigo-600 text-sm">${esc(p.preco)}</span>
         <div class="flex items-center space-x-2">
-          ${p.meu ? `<button data-excluir="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-trash"></i> Excluir</button>`
+          ${meus.has(p.id) ? `<button data-excluir="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-trash"></i> Excluir</button>`
                   : `<button data-ocultar="${esc(p.id)}" class="text-gray-400 hover:text-red-500 text-xs px-2 py-2"><i class="fa-solid fa-flag"></i> Denunciar</button>`}
           <button data-zap="${esc(p.id)}" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl"><i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp</button>
         </div>
@@ -160,15 +195,18 @@ function desenhar() {
     </article>`).join('');
 }
 
-$('feed').addEventListener('click', e => {
+$('feed').addEventListener('click', async e => {
   const zap = e.target.closest('[data-zap]'), exc = e.target.closest('[data-excluir]'), ocu = e.target.closest('[data-ocultar]');
   if (zap) {
     const p = posts.find(x => x.id === zap.dataset.zap); if (!p) return;
     const msg = `Olá, ${p.autor}! Vi sua publicação no JobJovem e gostaria de conversar.`;
     window.open(`https://wa.me/${encodeURIComponent(p.whatsapp)}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   }
-  if (exc && confirm('Excluir sua publicação?')) { posts = posts.filter(x => x.id !== exc.dataset.excluir); salvar(); desenhar(); }
-  if (ocu && confirm('Denunciar e ocultar esta publicação?')) { posts = posts.filter(x => x.id !== ocu.dataset.ocultar); salvar(); desenhar(); toast('Publicação ocultada.'); }
+  if (exc && meus.has(exc.dataset.excluir) && confirm('Excluir sua publicação?')) {
+    try { posts = (await baixar()).filter(x => x.id !== exc.dataset.excluir); await enviar(posts); salvarLS(BK, posts); desenhar(); }
+    catch { toast('Não foi possível excluir agora. Tente de novo.'); }
+  }
+  if (ocu && confirm('Denunciar e ocultar esta publicação?')) { ocultos.add(ocu.dataset.ocultar); salvarLS(OCULTOS, [...ocultos]); desenhar(); toast('Publicação ocultada.'); }
 });
 
 /* ===== Modal e publicação ===== */
@@ -179,28 +217,33 @@ $('abrir-modal').addEventListener('click', () => abrirModal());
 document.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', () => abrirModal(b.dataset.abrir)));
 $('fechar-modal').addEventListener('click', fecharModal);
 
-$('btn-publicar').addEventListener('click', () => {
+$('btn-publicar').addEventListener('click', async () => {
   const autor = $('autor').value.trim(), texto = $('texto').value.trim(), foto = fotoEscolhida;
   const zap = $('whatsapp').value.replace(/\D/g, '');
   if (!autor) return erroForm('Informe seu nome.');
   if (texto.length < 10) return erroForm('A descrição precisa ter pelo menos 10 caracteres.');
   if (zap.length < 10 || zap.length > 13) return erroForm('Informe um WhatsApp válido com DDD.');
+  if (Date.now() - Number(lerLS(ULTIMO, 0)) < 60000) return erroForm('Aguarde 1 minuto entre uma publicação e outra.');
   erroForm('');
-  posts.unshift({
-    id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7), meu: true, created_at: new Date().toISOString(),
+  const btn = $('btn-publicar'); btn.disabled = true; btn.textContent = 'Publicando...';
+  const novo = {
+    id: 'p' + Date.now() + Math.random().toString(36).slice(2, 7), created_at: new Date().toISOString(),
     tipo: $('tipo').value, categoria: $('categoria').value, autor, foto,
     whatsapp: zap.startsWith('55') ? zap : '55' + zap, texto, preco: $('preco').value.trim() || 'A combinar'
-  });
-  if (!salvar()) toast('Publicado, mas o navegador não conseguiu guardar. Ao fechar a página, ele some.');
-  else toast('Publicado!');
-  ['autor', 'foto', 'whatsapp', 'texto', 'preco'].forEach(id => $(id).value = '');
-  fotoEscolhida = ''; $('foto-previa').removeAttribute('src'); $('foto-rotulo').textContent = 'Escolher minha foto (opcional)';
-  fecharModal(); desenhar();
+  };
+  try {
+    posts = unir([novo], await baixar()); await enviar(posts);
+    meus.add(novo.id); salvarLS(MEUS, [...meus]); salvarLS(BK, posts); salvarLS(ULTIMO, Date.now());
+    ['autor', 'foto', 'whatsapp', 'texto', 'preco'].forEach(id => $(id).value = '');
+    fotoEscolhida = ''; $('foto-previa').removeAttribute('src'); $('foto-rotulo').textContent = 'Escolher minha foto (opcional)';
+    fecharModal(); desenhar(); toast('Publicado!');
+  } catch { erroForm('Não foi possível publicar agora. Verifique a conexão e tente de novo.'); }
+  finally { btn.disabled = false; btn.textContent = 'Publicar'; }
 });
 
-posts = ler();
 desenharFiltros();
-desenhar();
+carregar();
+setInterval(carregar, 60000);
 </script>
 </body>
 </html>
